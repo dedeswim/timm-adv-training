@@ -58,7 +58,7 @@ def pgd(model: nn.Module,
         num_classes: Optional[int] = None,
         random_targets: bool = False,
         logits_y: bool = False,
-        take_sign=True,
+        take_sign=False,
         dev_env: Optional[DeviceEnv] = None) -> torch.Tensor:
     local_project_fn = functools.partial(project_fn, eps=eps, boundaries=boundaries)
     x_adv = init_fn(x, eps, project_fn, boundaries)
@@ -94,23 +94,16 @@ def pgd(model: nn.Module,
     return x_adv
 
 
-_ATTACKS = {"pgd": pgd, "targeted_pgd": functools.partial(pgd, targeted=True, random_targets=True)}
+_ATTACKS = {
+    "pgd": pgd,
+    "fgsm": functools.partial(pgd, take_sign=True),
+    "targeted_pgd": functools.partial(pgd, targeted=True, random_targets=True)
+}
+
 _INIT_PROJECT_FN: Dict[str, Tuple[InitFn, ProjectFn]] = {
     "linf": (init_linf, project_linf),
     "l2": (init_l2, project_l2)
 }
-
-
-def make_sine_schedule(final: float, warmup: int, zero_eps_epochs: int) -> Callable[[int], float]:
-
-    def sine_schedule(step: int) -> float:
-        if step < zero_eps_epochs:
-            return 0.0
-        if step < warmup:
-            return 0.5 * final * (1 + math.sin(math.pi * ((step - zero_eps_epochs) / warmup - 0.5)))
-        return final
-
-    return sine_schedule
 
 
 def make_linear_schedule(final: float, warmup: int, zero_eps_epochs: int) -> Callable[[int], float]:
@@ -127,7 +120,6 @@ def make_linear_schedule(final: float, warmup: int, zero_eps_epochs: int) -> Cal
 
 _SCHEDULES: Dict[str, ScheduleMaker] = {
     "linear": make_linear_schedule,
-    "sine": make_sine_schedule,
     "constant": (lambda eps, _1, _2: (lambda _: eps))
 }
 
@@ -245,6 +237,7 @@ class AdvTrainingLoss(nn.Module):
 
 class TRADESLoss(nn.Module):
     """Adapted from https://github.com/yaodongyu/TRADES/blob/master/trades.py#L17"""
+
     def __init__(self,
                  attack_cfg: AttackCfg,
                  natural_criterion: nn.Module,
