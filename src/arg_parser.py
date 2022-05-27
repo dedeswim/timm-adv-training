@@ -1,3 +1,12 @@
+"""Argumet parser for training.
+
+Parts of this file are adapted from PyTorch Image Models by Ross Wightman
+
+The original ones can be found at https://github.com/rwightman/pytorch-image-models/
+
+The original license can be found at this link: https://github.com/rwightman/pytorch-image-models/blob/master/LICENSE
+"""
+
 import argparse
 
 import yaml
