@@ -1,6 +1,4 @@
-# ViTs Robustness
-
-# Pre-requisites
+## Pre-requisites
 
 This repo works with:
 
@@ -15,27 +13,61 @@ In case you want to read or write your results to a Google Cloud Storage bucket 
 
 ## Training
 
+All these commands are meant to be run on TPU VMs with 8 TPU cores. They can be easily adapted to work on GPUs by using `torch.distributed.launch` (and by removing the `launch_xla.py --num-devices 8` part). The LR can be scaled as explained in the appendix of our paper (which follows DeiT's convention). More info about how to run the training script on TPUs and GPUs can be found in `timm.bits`'s [README](https://github.com/rwightman/pytorch-image-models/tree/bits_and_tpu/timm/bits#timm-bits).
+
+To log the results to W&B it is enough to add the flag `--log-wandb`. The W&B experiment will have the name passed to the `--experiment` flag.
+
+### Training an XCiT-S12 on ImageNet
+
+<details>
+
 ```bash
-DATA_DIR=gs://vits-robustness/tensorflow_datasets \
-DATASET=tfds/imagenet2012 \
-MODEL=xcit_nano_12_p16_224 \
-EXPERIMENT=xcit-nano-adv-training-imagenet \
-OUTPUT=gs://vits-robustness/output/train \
-CONFIG=configs/xcit-nano-adv-training.yaml \
-python launch_xla.py --num-devices 8 train.py $DATA_DIR --dataset $DATASET --experiment $EXPERIMENT --output $OUTPUT --log-wandb --model xcit_nano_12_p16_224 --config $CONFIG --epochs 10 --epochs 100 --batch-size 128 --adv-training pgd --no-normalize --attack-steps 1 --log-interval 50 --eps-schedule linear --eps-schedule-period 10
+python launch_xla.py --num-devices 8 train.py $DATA_DIR --dataset tfds/imagenet2012 --experiment $EXPERIMENT --output $OUTPUT --model xcit_small_12_p16_224 --config configs/xcit-adv-training.yaml
 ```
+
+Where `$OUTPUT` should be the dir where the checkpoints are saved, `$EXPERIMENT` is the name of the experiment for W&B logging and to use as a subdirectory of `$OUTPUT`, and `$DATA_DIR` is the directory where the data are saved. For instance, TFDS saved the data in `~/tensorflow_data` by default.
 
 ## Validation
 
+For validating using full AA models trained on ImageNet, CIFAR-10 and CIFAR-100 it is recommended to use [this](#validating-using-robustbench) command. To evaluate using APGD-CE only, or to evaluate other datasets than those above (e.g., Caltech101 and Oxford Flowers), then use [this](#validating-using-the-validation-script) script instead.
+
+### Validating using RobustBench
+
+<details>
+
+This script will run the full AutoAttack using RobustBench's interface.
+
 ```bash
-DATA_DIR=gs://vits-robustness/tensorflow_datasets \
-DATASET=tfds/imagenet2012 \
-MODEL=xcit_nano_12_p16_224 \
-CHECKPOINT_DIR=gs://vits-robustness/output/train/xcit-nano-adv-training-imagenet-8 \
-python launch_xla.py --num-devices 1 validate.py $DATA_DIR --dataset $DATASET --model $MODEL --batch-size 1024 --no-normalize --checkpoint $CHECKPOINT_DIR/last.pth.tar --attack-eps 8
+python3 validate_robustbench.py --data-dir $DATA_DIR --dataset $DATASET --model $MODEL --batch-size 1024 --checkpoint $CHECKPOINT --eps $EPS
 ```
 
-In order to run the tests, install pytest via `pip install pytest`, and run
+If the model has been trained using a specific mean and std, then they should be specified with the `--mean` and `--std` flags, similarly to training.
+
+</details>
+
+### Validating using the validation script
+
+Do not use this script to run APGD-CE or AutoAttack on TPU (and XLA in general), as the compilation will take an unreasonable amount of time.
+
+<details>
+
+```bash
+python3 validate.py $DATA_DIR --dataset $DATASET --log-freq 1 --model $MODEL --checkpoint $CHECKPOINT --mean <mean> --std <std> --attack $ATTACK --attack-eps $EPS
+```
+
+If the model has been trained using a specific mean and std, then they should be specified with the `--mean` and `--std` flags, and the `--normalize-model` flag should be specified, similarly to training. Otherwise the `--no-normalize` flag sould be specified. For both Caltech101 and Oxford Flowers, you should specify `--num-classes 102`, and for Caltech101 only `--split test`. If you just want to run PGD, then you can specify the number of steps with `--attack-steps 200`.
+
+</details>
+
+## Code
+
+A large amount of the code is adapted from [`timm`](https://github.com/rwightman/pytorch-image-models), in particular from the `bits_and_tpu` branch. The code by Ross Wightman is originally released under Apache-2.0 License, which can be found [here](https://github.com/rwightman/pytorch-image-models/blob/master/LICENSE).
+
+The entry point for training is [train.py](train.py). While in [src](src/) there is a bunch of utility modules, as well as model definitions (which are found in [src/models](src/models/)).
+
+### Tests
+
+In order to run the unit tests, install pytest via `pip install pytest`, and run
 
 ```bash
 python -m pytest .
