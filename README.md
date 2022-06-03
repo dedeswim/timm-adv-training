@@ -19,8 +19,6 @@ To log the results to W&B it is enough to add the flag `--log-wandb`. The W&B ex
 
 ### Training an XCiT-S12 on ImageNet
 
-<details>
-
 ```bash
 python launch_xla.py --num-devices 8 train.py $DATA_DIR --dataset tfds/imagenet2012 --experiment $EXPERIMENT --output $OUTPUT --model xcit_small_12_p16_224 --config configs/xcit-adv-training.yaml
 ```
