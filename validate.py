@@ -22,7 +22,6 @@ import os
 from collections import OrderedDict
 from typing import Dict
 
-import tensorflow as tf
 import torch
 import torch.nn as nn
 import torch.nn.parallel
@@ -517,6 +516,7 @@ def main():
 
 def log_results_to_wandb(args: argparse.Namespace, results: Dict):
     import wandb
+    import tensorflow as tf
 
     # Get args file from bucket
     assert args.checkpoint.startswith('gs://')
@@ -550,6 +550,7 @@ def log_results_to_wandb(args: argparse.Namespace, results: Dict):
 
 def write_results(results_file, results):
     if results_file.startswith("gs://"):
+        import tensorflow as tf
         open_f = tf.io.gfile.GFile
     else:
         open_f = open

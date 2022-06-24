@@ -6,7 +6,6 @@ import tempfile
 from collections import OrderedDict
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
-import tensorflow as tf
 import timm
 import torch
 import torch.nn.functional as F
@@ -24,6 +23,7 @@ def get_outdir(path: str, *paths: str, inc=False) -> str:
     """Adapted to get out dir from GCS"""
     outdir = os.path.join(path, *paths)
     if path.startswith('gs://'):
+        import tensorflow as tf
         os_module = tf.io.gfile
         exists_fn = lambda x: os_module.exists(x)
     else:
@@ -44,6 +44,7 @@ def get_outdir(path: str, *paths: str, inc=False) -> str:
 
 
 def load_model_from_gcs(checkpoint_path: str, model_name: str, **kwargs):
+    import tensorflow as tf
     with tempfile.TemporaryDirectory() as dst:
         local_checkpoint_path = os.path.join(dst, os.path.basename(checkpoint_path))
         tf.io.gfile.copy(checkpoint_path, local_checkpoint_path)
@@ -52,6 +53,7 @@ def load_model_from_gcs(checkpoint_path: str, model_name: str, **kwargs):
 
 
 def load_state_dict_from_gcs(model: nn.Module, checkpoint_path: str):
+    import tensorflow as tf
     with tempfile.TemporaryDirectory() as dst:
         local_checkpoint_path = os.path.join(dst, os.path.basename(checkpoint_path))
         tf.io.gfile.copy(checkpoint_path, local_checkpoint_path)
@@ -60,6 +62,7 @@ def load_state_dict_from_gcs(model: nn.Module, checkpoint_path: str):
 
 
 def upload_checkpoints_gcs(checkpoints_dir: str, output_dir: str):
+    import tensorflow as tf
     checkpoints_paths = glob.glob(os.path.join(checkpoints_dir, '*.pth.tar'))
     for checkpoint in checkpoints_paths:
         gcs_checkpoint_path = os.path.join(output_dir, os.path.basename(checkpoint))
@@ -72,6 +75,7 @@ class GCSSummaryCsv(bits.monitor.SummaryCsv):
         super().__init__(output_dir, filename)
 
     def update(self, row_dict):
+        import tensorflow as tf
         with tf.io.gfile.GFile(self.filename, mode='a') as cf:
             dw = csv.DictWriter(cf, fieldnames=row_dict.keys())
             if self.needs_header:  # first iteration (epoch == 1 can't be used)
@@ -184,6 +188,7 @@ class CombinedLoaders:
 
 
 def write_wandb_info(notes: str, output_dir: str, wandb_run):
+    import tensorflow as tf
     assert output_dir is not None
     # Log run notes and *true* output dir to wandb
     if output_dir.startswith("gs://"):

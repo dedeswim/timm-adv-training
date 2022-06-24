@@ -14,8 +14,8 @@ import torch.nn.functional as F
 def _cfg(url='', **kwargs):
     return {
         'url': url,
-        'num_classes': 1000,
-        'input_size': (3, 224, 224),
+        'num_classes': 10,
+        'input_size': (3, 32, 32),
         'pool_size': None,
         'crop_pct': 0.875,
         'interpolation': 'bilinear',

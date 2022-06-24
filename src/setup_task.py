@@ -14,7 +14,6 @@ from dataclasses import replace
 from datetime import datetime
 from typing import Any, Dict, Tuple
 
-import tensorflow as tf
 import torch
 import torch.nn as nn
 import torch.utils.data as data
@@ -270,6 +269,7 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
 def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
     with tempfile.TemporaryDirectory() as dst:
         if args.initial_checkpoint is not None and args.initial_checkpoint.startswith("gs://"):
+            import tensorflow as tf
             checkpoint_path = os.path.join(dst, os.path.basename(args.initial_checkpoint))
             tf.io.gfile.copy(args.initial_checkpoint, checkpoint_path)
         else:
@@ -293,6 +293,7 @@ def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
         # Adapted from https://github.com/facebookresearch/deit/blob/main/main.py#L250
         with tempfile.TemporaryDirectory() as dst:
             if args.finetune.startswith("gs://"):
+                import tensorflow as tf
                 checkpoint_path = os.path.join(dst, os.path.basename(args.finetune))
                 tf.io.gfile.copy(args.finetune, checkpoint_path)
             else:
@@ -357,6 +358,7 @@ def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
 
     with tempfile.TemporaryDirectory() as dst:
         if args.resume is not None and args.resume.startswith("gs://"):
+            import tensorflow as tf
             resume_checkpoint_path = os.path.join(dst, os.path.basename(args.resume))
             tf.io.gfile.copy(args.resume, resume_checkpoint_path)
         else:
@@ -495,6 +497,7 @@ def setup_checkpoints_output(args: Dict[str, Any], args_text: str, data_config: 
                                            max_history=args["checkpoint_hist"])
 
     if output_dir.startswith("gs://"):
+        import tensorflow as tf
         with tf.io.gfile.GFile(os.path.join(output_dir, 'args.yaml'), 'w') as f:
             f.write(args_text)
     else:

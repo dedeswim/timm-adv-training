@@ -25,6 +25,14 @@ python launch_xla.py --num-devices 8 train.py $DATA_DIR --dataset tfds/imagenet2
 
 Where `$OUTPUT` should be the dir where the checkpoints are saved, `$EXPERIMENT` is the name of the experiment for W&B logging and to use as a subdirectory of `$OUTPUT`, and `$DATA_DIR` is the directory where the data are saved. For instance, TFDS saved the data in `~/tensorflow_data` by default.
 
+### Training a WideResNet-28-10 on CIFAR10
+
+```bash
+python train.py $DATA_DIR --dataset torch/cifar10 --experiment $EXPERIMENT --output $OUTPUT --model widre --config configs/xcit-adv-training.yaml
+```
+
+Where `$OUTPUT` should be the dir where the checkpoints are saved, `$EXPERIMENT` is the name of the experiment for W&B logging and to use as a subdirectory of `$OUTPUT`, and `$DATA_DIR` is the directory where the data are saved. For instance, TFDS saved the data in `~/tensorflow_data` by default.
+
 ## Validation
 
 For validating using full AA models trained on ImageNet, CIFAR-10 and CIFAR-100 it is recommended to use [this](#validating-using-robustbench) command. To evaluate using APGD-CE only, or to evaluate other datasets than those above (e.g., Caltech101 and Oxford Flowers), then use [this](#validating-using-the-validation-script) script instead.
