@@ -71,6 +71,7 @@ def train_one_epoch(
     top1, = accuracy_meter.compute().values()
     robust_top1, = robust_accuracy_meter.compute().values()
 
+    # TODO(@zishenwan, @kshitij11): add here time and energy used
     return OrderedDict([('loss', loss_meter.compute().item()), ('top1', top1.item()),
                         ('robust_top1', robust_top1.item()), ('eps', state.eps_schedule(state.epoch)),
                         ('lr', state.updater.get_average_lr())])
@@ -251,6 +252,8 @@ def evaluate(model: nn.Module,
 
     top1, top5 = accuracy_m.compute().values()
     robust_top1, _ = robust_accuracy_m.compute().values()
+    
+    # TODO(@zishenwan, @kshitij11): add here time and energy used
     results = OrderedDict([
         ('loss', losses_m.compute().item()),
         ('top1', top1.item()),
