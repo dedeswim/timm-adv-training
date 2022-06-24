@@ -17,7 +17,7 @@ def _cfg(url='', **kwargs):
         'num_classes': 10,
         'input_size': (3, 32, 32),
         'pool_size': None,
-        'crop_pct': 0.875,
+        'crop_pct': 1.0,
         'interpolation': 'bilinear',
         'fixed_input_size': True,
         'mean': IMAGENET_DEFAULT_MEAN,

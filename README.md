@@ -28,7 +28,7 @@ Where `$OUTPUT` should be the dir where the checkpoints are saved, `$EXPERIMENT`
 ### Training a WideResNet-28-10 on CIFAR10
 
 ```bash
-python train.py $DATA_DIR --dataset torch/cifar10 --experiment $EXPERIMENT --output $OUTPUT --model widre --config configs/xcit-adv-training.yaml
+python -m torch.distributed.run --nproc_per_node=4 --master_port=6712 train.py /p/vast1/MLdata --dataset torch/cifar10 --experiment test --output /p/gpfs1/robustHW --model wide_resnet28_10 --config configs/wrn-adv-training-cifar10.yaml
 ```
 
 Where `$OUTPUT` should be the dir where the checkpoints are saved, `$EXPERIMENT` is the name of the experiment for W&B logging and to use as a subdirectory of `$OUTPUT`, and `$DATA_DIR` is the directory where the data are saved. For instance, TFDS saved the data in `~/tensorflow_data` by default.

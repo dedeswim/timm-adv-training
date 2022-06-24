@@ -122,7 +122,7 @@ parser.add_argument('-b',
                     type=int,
                     default=256,
                     metavar='N',
-                    help='input batch size for training (default: 32)')
+                    help='input batch size for training (default: 256)')
 parser.add_argument('-vb',
                     '--validation-batch-size',
                     type=int,

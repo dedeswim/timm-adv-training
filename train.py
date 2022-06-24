@@ -112,7 +112,7 @@ def main():
         eval_attack = None
 
     if dev_env.global_primary:
-        _logger.info('Starting training, the first steps may take a long time')
+        _logger.info('Starting training, the first steps may take a long time if running on XLA due to compilation')
 
     try:
         for epoch in range(train_state.epoch, train_cfg.num_epochs):
