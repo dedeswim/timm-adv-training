@@ -89,7 +89,8 @@ class WideResNet(nn.Module):
                  drop_rate=0.0,
                  bias_last=True,
                  in_chans=3,
-                 img_size=224):
+                 img_size=32,
+                 drop_path_rate=None):
         super().__init__()
         self.num_classes = num_classes
         n_channels = [16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor]
