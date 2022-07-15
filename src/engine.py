@@ -94,8 +94,8 @@ def train_one_epoch(
     # TODO(@zishenwan, @kshitij11): add here time and energy used
     return OrderedDict([('loss', loss_meter.compute().item()), ('top1', top1.item()),
                         ('robust_top1', robust_top1.item()), ('eps', state.eps_schedule(state.epoch)),
-                        ('lr', state.updater.get_average_lr()),
-                        ('latency', start.elapsed_time(end), ('emissions', emissions))])
+                        ('lr', state.updater.get_average_lr()), ('latency', start.elapsed_time(end)),
+                        ('emissions', emissions)])
 
 
 def after_train_step(
