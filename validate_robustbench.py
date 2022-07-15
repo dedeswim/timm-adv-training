@@ -42,6 +42,7 @@ parser.add_argument('--std',
                     default=None,
                     metavar='STD',
                     help='Override std deviation of of dataset')
+parser.add_argument("--gpus", default=1, type=int, help="Number of GPUs to use")
 
 
 def main(args):
@@ -97,9 +98,8 @@ def main(args):
             transforms.Resize(scale_size, interpolation=transforms.InterpolationMode(interpolation)),
             transforms.CenterCrop(img_size), model)
 
-    model = nn.DataParallel(model)
+    model = nn.DataParallel(model, device_ids=list(range(args.gpus)))
     model.eval()
-    model.to(device)
 
     clean_acc, robust_acc = benchmark(
         model,
