@@ -1,6 +1,6 @@
 aa: None
 adv_training: pgd
-attack: pgd
+attack: fgsm
 attack_boundaries:
 - 0
 - 1
@@ -10,7 +10,7 @@ attack_norm: linf
 attack_steps: 7
 amp: false
 aug_splits: 0
-batch_size: 250
+batch_size: 128
 bce_loss: false
 bce_target_thresh: null
 bn_eps: null
@@ -42,7 +42,7 @@ epochs: 205
 eps_schedule: constant
 eps_schedule_period: 10
 eval_metric: robust_top1
-experiment: test
+experiment: pgd-adv-training-repro
 force_cpu: false
 gp: null
 hflip: 0.5
@@ -85,7 +85,7 @@ no_aug: false
 no_normalize: true
 no_resume_opt: false
 normalize_model: true
-num_classes: null
+num_classes: 10
 opt: sgd
 opt_betas: null
 opt_eps: 1.0e-8
