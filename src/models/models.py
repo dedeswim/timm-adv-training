@@ -13,6 +13,7 @@ default_cfgs = {
     'xcit_small_12_p4_32': xcit._cfg(input_size=(3, 32, 32)),
     'xcit_medium_12_p4_32': xcit._cfg(input_size=(3, 32, 32)),
     'xcit_large_12_p4_32': xcit._cfg(input_size=(3, 32, 32)),
+    'resnet50_32': resnet._cfg(input_size=(3, 32, 32), interpolation='bicubic', crop_pct=1),
     'resnet18_gelu': resnet._cfg(),
     'resnet50_gelu': resnet._cfg(interpolation='bicubic', crop_pct=0.95),
     'resnext152_32x8d': resnet._cfg(input_size=(3, 380, 380))
@@ -143,6 +144,17 @@ def xcit_small_12_p2_32(pretrained=False, **kwargs):
     model = xcit._create_xcit('xcit_small_12_p2_32', pretrained=pretrained, **model_kwargs)
     assert isinstance(model, xcit.XCiT)
     model = utils.adapt_model_patches(model, 2)
+    return model
+
+
+@register_model
+def resnet50_32(pretrained=False, **kwargs):
+    """Constructs a ResNet-50 model.
+    """
+    model_args = dict(block=resnet.Bottleneck, layers=[3, 4, 6, 3], **kwargs)
+    model = resnet._create_resnet('resnet50_32', pretrained, **model_args)
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    model.maxpool = nn.Identity()
     return model
 
 
