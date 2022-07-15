@@ -84,8 +84,8 @@ def train_one_epoch(
     end.record()
     torch.cuda.synchronize()
 
-    #emissions:float = co2tracker.stop()
-    energy_consumed:float = co2tracker.stop()
+    emissions:float = co2tracker.stop()
+    #energy_consumed:float = co2tracker.stop()
     f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}; Energy consumed (kwh): {energy_consumed}; \n")
     f.close()
     #co2tracker.stop()
