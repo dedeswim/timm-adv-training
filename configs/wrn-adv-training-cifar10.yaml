@@ -100,8 +100,8 @@ resplit: false
 resume: ''
 save_images: false
 scale:
-- 1.0
-- 1.0
+- 1.125
+- 1.125
 sched: multistep
 seed: 42
 smoothing: 0.1
