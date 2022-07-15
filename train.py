@@ -36,7 +36,6 @@ from src.setup_task import (resolve_attack_cfg, setup_checkpoints_output, setup_
 
 _logger = logging.getLogger('train')
 
-
 def main():
     setup_default_logging()
     args, args_text = parse_args()

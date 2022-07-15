@@ -35,7 +35,7 @@ drop_block: null
 drop_connect: null
 drop_path: null
 epoch_repeats: 0.0
-epochs: 400
+epochs: 1
 eps_schedule: constant
 eps_schedule_period: 10
 eval_metric: robust_top1

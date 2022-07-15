@@ -19,6 +19,7 @@ from timm.bits import (AccuracyTopK, AvgTensor, DeviceEnv, Monitor, Tracker, Tra
 from src import utils
 from src.attacks import AttackFn
 
+from codecarbon import EmissionsTracker
 
 def train_one_epoch(
     state: utils.AdvTrainState,
@@ -26,6 +27,16 @@ def train_one_epoch(
     loader,
     dev_env: DeviceEnv,
 ):
+
+    f = open("stats.txt", "a")
+    
+    co2tracker = EmissionsTracker() 
+    co2tracker.start()
+
+    start = torch.cuda.Event(enable_timing=True)
+    end = torch.cuda.Event(enable_timing=True)
+    start.record()
+
     tracker = Tracker()
     # FIXME move loss meter into task specific TaskMetric
     loss_meter = AvgTensor()
@@ -70,6 +81,14 @@ def train_one_epoch(
 
     top1, = accuracy_meter.compute().values()
     robust_top1, = robust_accuracy_meter.compute().values()
+    end.record()
+    torch.cuda.synchronize()
+
+    #emissions:float = co2tracker.stop()
+    energy_consumed:float = co2tracker.stop()
+    f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}; Energy consumed (kwh): {energy_consumed}; \n")
+    f.close()
+    #co2tracker.stop()
 
     # TODO(@zishenwan, @kshitij11): add here time and energy used
     return OrderedDict([('loss', loss_meter.compute().item()), ('top1', top1.item()),
