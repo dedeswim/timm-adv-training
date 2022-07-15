@@ -67,7 +67,10 @@ lr_k_decay: 1.0
 lr_noise: null
 lr_noise_pct: 0.67
 lr_noise_std: 1.0
-mean: null
+mean:
+- 0.4914
+- 0.4822
+- 0.4465
 min_lr: 1.0e-05
 mixup: 0.0
 mixup_mode: batch
@@ -81,6 +84,7 @@ momentum: 0.9
 no_aug: false
 no_normalize: true
 no_resume_opt: false
+normalize_model: true
 num_classes: null
 opt: sgd
 opt_betas: null
@@ -107,7 +111,10 @@ seed: 42
 smoothing: 0.1
 split_bn: false
 start_epoch: null
-std: null
+std:
+- 0.2023
+- 0.1994
+- 0.2010
 sync_bn: false
 torchscript: false
 train_interpolation: bicubic
