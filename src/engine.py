@@ -31,7 +31,7 @@ def train_one_epoch(
 
     f = open("stats.txt", "a")
 
-    co2tracker = EmissionsTracker()
+    co2tracker = EmissionsTracker(log_level="warning")
     co2tracker.start()
 
     start = torch.cuda.Event(enable_timing=True)
