@@ -514,7 +514,7 @@ def resolve_attack_cfg(args, eval=False) -> AttackCfg:
     else:
         name = args.attack
         eps = args.attack_eps / 255
-    step_size = args.attack_lr or (1.5 * eps / args.attack_steps)
+    step_size = args.attack_lr / 255 or (1.5 * eps / args.attack_steps)
 
     return AttackCfg(name=name,
                      eps=eps,

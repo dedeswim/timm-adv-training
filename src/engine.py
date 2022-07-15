@@ -21,6 +21,7 @@ from src.attacks import AttackFn
 
 from codecarbon import EmissionsTracker
 
+
 def train_one_epoch(
     state: utils.AdvTrainState,
     services: TrainServices,
@@ -29,8 +30,8 @@ def train_one_epoch(
 ):
 
     f = open("stats.txt", "a")
-    
-    co2tracker = EmissionsTracker() 
+
+    co2tracker = EmissionsTracker()
     co2tracker.start()
 
     start = torch.cuda.Event(enable_timing=True)
@@ -84,7 +85,7 @@ def train_one_epoch(
     end.record()
     torch.cuda.synchronize()
 
-    emissions:float = co2tracker.stop()
+    emissions: float = co2tracker.stop()
     #energy_consumed:float = co2tracker.stop()
     f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}\n")
     f.close()
@@ -93,7 +94,8 @@ def train_one_epoch(
     # TODO(@zishenwan, @kshitij11): add here time and energy used
     return OrderedDict([('loss', loss_meter.compute().item()), ('top1', top1.item()),
                         ('robust_top1', robust_top1.item()), ('eps', state.eps_schedule(state.epoch)),
-                        ('lr', state.updater.get_average_lr())])
+                        ('lr', state.updater.get_average_lr())],
+                       ('latency', start.elapsed_time(end), ('emissions', emissions)))
 
 
 def after_train_step(
@@ -271,7 +273,7 @@ def evaluate(model: nn.Module,
 
     top1, top5 = accuracy_m.compute().values()
     robust_top1, _ = robust_accuracy_m.compute().values()
-    
+
     # TODO(@zishenwan, @kshitij11): add here time and energy used
     results = OrderedDict([
         ('loss', losses_m.compute().item()),

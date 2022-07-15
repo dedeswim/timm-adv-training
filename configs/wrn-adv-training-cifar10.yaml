@@ -5,9 +5,9 @@ attack_boundaries:
 - 0
 - 1
 attack_eps: 8
-attack_lr: null
+attack_lr: 2
 attack_norm: linf
-attack_steps: 10
+attack_steps: 7
 amp: false
 aug_splits: 0
 batch_size: 250
@@ -27,7 +27,10 @@ cutmix: 1.0
 cutmix_minmax: null
 data_dir: /p/vast1/MLdata
 dataset: torch/cifar10
-decay_epochs: 267
+decay_epochs: null
+decay_milestones:
+- 103
+- 154
 decay_rate: 0.1
 dist_bn: reduce
 drop: 0.0
@@ -35,7 +38,7 @@ drop_block: null
 drop_connect: null
 drop_path: null
 epoch_repeats: 0.0
-epochs: 1
+epochs: 205
 eps_schedule: constant
 eps_schedule_period: 10
 eval_metric: robust_top1
@@ -45,13 +48,18 @@ gp: null
 hflip: 0.5
 img_size: null
 initial_checkpoint: ''
-input_size: null
+input_size:
+- 3
+- 32
+- 32
 interpolation: ''
 jsd_loss: false
 local_rank: 0
 log_interval: 50
 log_wandb: false
-lr: 0.1
+lr: null
+lr_base: 0.1
+lr_base_size: 128
 lr_cycle_decay: 0.5
 lr_cycle_limit: 1
 lr_cycle_mul: 1.0
@@ -82,8 +90,8 @@ patience_epochs: 10
 pin_mem: false
 pretrained: false
 ratio:
-- 0.98
-- 1.02
+- 1.0
+- 1.0
 recount: 1
 recovery_interval: 0
 remode: pixel
@@ -94,7 +102,7 @@ save_images: false
 scale:
 - 1.0
 - 1.0
-sched: step
+sched: multistep
 seed: 42
 smoothing: 0.1
 split_bn: false
@@ -111,5 +119,5 @@ validation_batch_size: null
 vflip: 0.0
 warmup_epochs: 0
 warmup_lr: 1.0e-6
-weight_decay: 5e-4
+weight_decay: 0.0002
 workers: 4
