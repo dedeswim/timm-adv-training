@@ -1,6 +1,7 @@
 import argparse
 import math
 
+import timm
 import torch
 from robustbench import benchmark
 from timm.models import xcit
@@ -44,12 +45,18 @@ parser.add_argument('--std',
 
 
 def main(args):
-    model = utils.load_model_from_gcs(
-        args.checkpoint,
-        args.model,
-        num_classes=args.num_classes,
-        in_chans=3,
-    )
+    if args.checkpoint.startswith("gs://"):
+        model = utils.load_model_from_gcs(
+            args.checkpoint,
+            args.model,
+            num_classes=args.num_classes,
+            in_chans=3,
+        )
+    else:
+        model = timm.create_model(args.model,
+                                  checkpoint_path=args.checkpoint,
+                                  num_classes=args.num_classes,
+                                  in_chans=3)
     if isinstance(model, xcit.XCiT) and model.patch_embed.patch_size != args.patch_size:
         assert args.patch_size in {2, 4, 8}, "Finetuning patch size can be only 4, 8 or `None`"
         assert isinstance(model, xcit.XCiT), "Finetuning patch size is only supported for XCiT"
@@ -94,15 +101,16 @@ def main(args):
     model.eval()
     model.to(device)
 
-    clean_acc, robust_acc = benchmark(model,
-                                      dataset=args.dataset,
-                                      data_dir=args.data_dir,
-                                      device=device,
-                                      batch_size=args.batch_size,
-                                      eps=args.eps / 255,
-                                      preprocessing=preprocessing,
-                                      #n_examples=256,
-                                      threat_model=args.threat_model)
+    clean_acc, robust_acc = benchmark(
+        model,
+        dataset=args.dataset,
+        data_dir=args.data_dir,
+        device=device,
+        batch_size=args.batch_size,
+        eps=args.eps / 255,
+        preprocessing=preprocessing,
+        #n_examples=256,
+        threat_model=args.threat_model)
 
     if args.log_wandb:
         args.attack_eps = args.eps / 255
