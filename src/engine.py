@@ -86,7 +86,7 @@ def train_one_epoch(
 
     emissions:float = co2tracker.stop()
     #energy_consumed:float = co2tracker.stop()
-    f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}; Energy consumed (kwh): {energy_consumed}; \n")
+    f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}\n")
     f.close()
     #co2tracker.stop()
 
