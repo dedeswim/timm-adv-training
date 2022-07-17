@@ -23,14 +23,14 @@ clip_mode: norm
 color_jitter: 0.0
 cooldown_epochs: 10
 crop_pct: null
-cutmix: 1.0
+cutmix: 0.0
 cutmix_minmax: null
 data_dir: /p/vast1/MLdata
 dataset: torch/cifar10
 decay_epochs: null
 decay_milestones:
-- 103
-- 154
+- 50
+- 100
 decay_rate: 0.1
 dist_bn: reduce
 drop: 0.0
@@ -38,7 +38,7 @@ drop_block: null
 drop_connect: null
 drop_path: null
 epoch_repeats: 0.0
-epochs: 205
+epochs: 150
 eps_schedule: constant
 eps_schedule_period: 10
 eval_metric: robust_top1
@@ -82,7 +82,7 @@ model_ema: false
 model_ema_decay: 0.999
 momentum: 0.9
 no_aug: false
-no_normalize: true
+no_normalize: false
 no_resume_opt: false
 normalize_model: true
 num_classes: 10
@@ -105,11 +105,11 @@ resplit: false
 resume: ''
 save_images: false
 scale:
-- 1.125
-- 1.125
+- 1.0
+- 1.0
 sched: multistep
 seed: 42
-smoothing: 0.1
+smoothing: 0.0
 split_bn: false
 start_epoch: null
 std:
@@ -127,5 +127,5 @@ validation_batch_size: null
 vflip: 0.0
 warmup_epochs: 0
 warmup_lr: 1.0e-6
-weight_decay: 0.0002
+weight_decay: 5e-4
 workers: 4
