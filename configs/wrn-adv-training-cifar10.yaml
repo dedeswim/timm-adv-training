@@ -90,6 +90,7 @@ opt: sgd
 opt_betas: null
 opt_eps: 1.0e-8
 output: /p/gpfs1/robustHW
+pad: 4
 patience_epochs: 10
 pin_mem: false
 pretrained: false

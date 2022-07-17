@@ -124,6 +124,7 @@ class AdvTrainState(bits.TrainState):
 @dataclasses.dataclass
 class MyPreprocessCfg(PreprocessCfg):
     normalize: bool = True
+    pad: int = 0
 
 
 class ImageNormalizer(nn.Module):

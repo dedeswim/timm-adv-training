@@ -284,6 +284,11 @@ parser.add_argument('--ratio',
                     default=[3. / 4., 4. / 3.],
                     metavar='RATIO',
                     help='Random resize aspect ratio (default: 0.75 1.33)')
+parser.add_argument('--pad',
+                    type=int,
+                    default=0,
+                    metavar='PIXELS',
+                    help='Pad image by PIXELS before cropping')
 parser.add_argument('--hflip', type=float, default=0.5, help='Horizontal flip training aug probability')
 parser.add_argument('--vflip', type=float, default=0., help='Vertical flip training aug probability')
 parser.add_argument('--color-jitter',
