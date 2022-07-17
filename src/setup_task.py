@@ -198,8 +198,8 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
                 loader_train_combine.mean = None
                 loader_train_combine.std = None
 
-    if data_config.pad > 0:
-        transform = transforms.Pad(data_config.pad)
+    if train_pp_cfg.pad > 0:
+        transform = transforms.Pad(train_pp_cfg.pad)
         loader_train.dataset.transform.transforms.insert(0, transform)
         if normalize_in_transform and args.aug_splits > 0:
             assert isinstance(loader_train.dataset, AugMixDataset)
