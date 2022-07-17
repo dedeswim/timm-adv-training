@@ -44,10 +44,14 @@ For validating using full AA models trained on ImageNet, CIFAR-10 and CIFAR-100 
 This script will run the full AutoAttack using RobustBench's interface.
 
 ```bash
-python3 validate_robustbench.py --data-dir $DATA_DIR --dataset $DATASET --model $MODEL --batch-size 1024 --checkpoint $CHECKPOINT --eps $EPS
+python3 validate_robustbench.py --data-dir /p/vast1/MLdata --dataset $DATASET --model $MODEL --batch-size 1024 --checkpoint $CHECKPOINT --eps $EPS
 ```
 
-If the model has been trained using a specific mean and std, then they should be specified with the `--mean` and `--std` flags, similarly to training.
+If the model has been trained using a specific mean and std, then they should be specified with the `--mean` and `--std` flags, similarly to training. Moreover, if you want to validate using multiple GPUs, you can run the script as follows (assuming you have 4 GPUs):
+
+```bash
+python validate_robustbench.py --data-dir /p/vast1/MLdata --dataset cifar10 --model resnet50_32 --batch-size 2048 --checkpoint /p/gpfs1/robustHW/pgd-adv-training-repro/best.pth.tar --eps 8 --mean 0.4914 0.4822 0.4465 --std 0.2023 0.1994 0.2010 --gpus 4
+```
 
 </details>
 
