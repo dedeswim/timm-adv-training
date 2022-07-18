@@ -16,13 +16,14 @@ from timm.models.helpers import build_model_with_cfg
 
 from ..data import CIFAR_10_MEAN, CIFAR_10_STD
 
+
 def _cfg(url='', **kwargs):
     return {
         'url': url,
-        'num_classes': 100,
+        'num_classes': 10,
         'input_size': (3, 32, 32),
         'pool_size': (4, 4),
-        'crop_pct': 0.875,
+        'crop_pct': 1,
         'interpolation': 'bilinear',
         'mean': CIFAR_10_MEAN,
         'std': CIFAR_10_STD,
@@ -32,7 +33,7 @@ def _cfg(url='', **kwargs):
     }
 
 
-default_cfgs = {'resnet50_robustness': _cfg(input_size=(3, 32, 32), interpolation='bicubic', crop_pct=1)}
+default_cfgs = {'resnet50_robustness': _cfg(input_size=(3, 32, 32), interpolation='bicubic')}
 
 
 class SequentialWithArgs(torch.nn.Sequential):
@@ -163,5 +164,5 @@ def _create_resnet(variant, pretrained=False, default_cfg=None, **kwargs):
 def resnet50_robustness(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model from the robustness library.
     """
-    model_args = dict(block=Bottleneck, layers=[3, 4, 6, 3],  **kwargs)
+    model_args = dict(block=Bottleneck, num_blocks=[3, 4, 6, 3], **kwargs)
     return _create_resnet('resnet50_robustness', pretrained, **model_args)
