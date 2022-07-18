@@ -42,6 +42,7 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
     data_config = resolve_data_config(vars(args), default_cfg=default_cfg, verbose=dev_env.primary)
     data_config['normalize'] = not (args.no_normalize or args.normalize_model)
     data_config['pad'] = args.pad
+    data_config['rand_rotation'] = args.rand_rotation
 
     if args.combine_dataset is not None:
         train_combine_batch_size = int(args.batch_size * args.combined_dataset_ratio)
@@ -129,6 +130,7 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
         std=data_config['std'],
         aug=train_aug_cfg,
         normalize=data_config['normalize'],
+        rand_rotation=data_config['rand_rotation'],
         pad=data_config['pad'])
 
     # if using PyTorch XLA and RandomErasing is enabled, we must normalize and do RE in transforms on CPU
@@ -199,18 +201,14 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
                 loader_train_combine.std = None
 
     if train_pp_cfg.pad > 0:
-        transform = transforms.Pad(train_pp_cfg.pad)
-        loader_train.dataset.transform.transforms.insert(0, transform)
-        if normalize_in_transform and args.aug_splits > 0:
-            assert isinstance(loader_train.dataset, AugMixDataset)
-            assert loader_train.dataset.normalize is not None
-            loader_train.dataset.normalize.transforms.insert(0, transform)
-        if loader_train_combine is not None:
-            loader_train_combine.dataset.transform.transforms.insert(0, transform)
-            if normalize_in_transform and args.aug_splits > 0:
-                assert isinstance(loader_train_combine.dataset, AugMixDataset)
-                assert loader_train_combine.dataset.normalize is not None
-                loader_train_combine.dataset.normalize.transforms.insert(0, transform)
+        add_transform(args, normalize_in_transform, loader_train, loader_train_combine,
+                      transforms.Pad(train_pp_cfg.pad), 0)
+    if train_pp_cfg.rand_rotation > 0:
+         add_transform(args, normalize_in_transform, loader_train, loader_train_combine,
+                      transforms.RandomRotation(train_pp_cfg.rand_rotation), -2)
+
+    print(loader_train.dataset.transform.transforms)
+    
 
     if args.reprob > 0 and train_aug_cfg is not None and not train_pp_cfg.normalize:
         random_erasing = NotNormalizedRandomErasing(probability=train_aug_cfg.re_prob,
@@ -279,6 +277,20 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
         loader_train = utils.CombinedLoaders(loader_train, loader_train_combine)
 
     return data_config, loader_eval, loader_train
+
+
+def add_transform(args, normalize_in_transform, loader_train, loader_train_combine, transform, position):
+    loader_train.dataset.transform.transforms.insert(position, transform)
+    if normalize_in_transform and args.aug_splits > 0:
+        assert isinstance(loader_train.dataset, AugMixDataset)
+        assert loader_train.dataset.normalize is not None
+        loader_train.dataset.normalize.transforms.insert(position, transform)
+    if loader_train_combine is not None:
+        loader_train_combine.dataset.transform.transforms.insert(position, transform)
+        if normalize_in_transform and args.aug_splits > 0:
+            assert isinstance(loader_train_combine.dataset, AugMixDataset)
+            assert loader_train_combine.dataset.normalize is not None
+            loader_train_combine.dataset.normalize.transforms.insert(position, transform)
 
 
 def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):

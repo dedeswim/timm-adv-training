@@ -71,6 +71,7 @@ def upload_checkpoints_gcs(checkpoints_dir: str, output_dir: str):
 
 class GCSSummaryCsv(bits.monitor.SummaryCsv):
     """SummaryCSV version to work with GCS"""
+
     def __init__(self, output_dir, filename='summary.csv'):
         super().__init__(output_dir, filename)
 
@@ -85,6 +86,7 @@ class GCSSummaryCsv(bits.monitor.SummaryCsv):
 
 
 class ComputeLossFn(nn.Module):
+
     def __init__(self, loss_fn: nn.Module):
         super().__init__()
         self.loss_fn = loss_fn
@@ -124,12 +126,14 @@ class AdvTrainState(bits.TrainState):
 @dataclasses.dataclass
 class MyPreprocessCfg(PreprocessCfg):
     normalize: bool = True
+    rand_rotation: int = 0
     pad: int = 0
 
 
 class ImageNormalizer(nn.Module):
     """From
     https://github.com/RobustBench/robustbench/blob/master/robustbench/model_zoo/architectures/utils_architectures.py#L8"""
+
     def __init__(self, mean: Tuple[float, float, float], std: Tuple[float, float, float]) -> None:
         super(ImageNormalizer, self).__init__()
 
@@ -149,6 +153,7 @@ def normalize_model(model: nn.Module, mean: Tuple[float, float, float], std: Tup
 
 
 class CombinedLoaders:
+
     def __init__(self, loader_1: Union[Fetcher, PrefetcherCuda], loader_2: Union[Fetcher, PrefetcherCuda]):
         self.loader_1 = loader_1
         self.loader_2 = loader_2
