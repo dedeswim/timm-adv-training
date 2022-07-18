@@ -205,10 +205,7 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
                       transforms.Pad(train_pp_cfg.pad), 0)
     if train_pp_cfg.rand_rotation > 0:
          add_transform(args, normalize_in_transform, loader_train, loader_train_combine,
-                      transforms.RandomRotation(train_pp_cfg.rand_rotation), -2)
-
-    print(loader_train.dataset.transform.transforms)
-    
+                      transforms.RandomRotation(train_pp_cfg.rand_rotation), -1)
 
     if args.reprob > 0 and train_aug_cfg is not None and not train_pp_cfg.normalize:
         random_erasing = NotNormalizedRandomErasing(probability=train_aug_cfg.re_prob,
