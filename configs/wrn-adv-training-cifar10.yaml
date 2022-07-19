@@ -94,6 +94,7 @@ pad: 4
 patience_epochs: 10
 pin_mem: false
 pretrained: false
+rand_crop: true
 rand_rotation: 2
 ratio:
 - 1.0

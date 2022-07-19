@@ -14,12 +14,11 @@ from typing import Optional, Tuple
 
 import torch
 import torch.nn as nn
+from codecarbon import EmissionsTracker
 from timm.bits import (AccuracyTopK, AvgTensor, DeviceEnv, Monitor, Tracker, TrainServices, TrainState)
 
 from src import utils
 from src.attacks import AttackFn
-
-from codecarbon import EmissionsTracker
 
 
 def train_one_epoch(

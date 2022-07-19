@@ -200,11 +200,19 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
                 loader_train_combine.mean = None
                 loader_train_combine.std = None
 
-    if train_pp_cfg.pad > 0:
+    if not args.no_aug and args.rand_crop:
+        add_transform(args,
+                      normalize_in_transform,
+                      loader_train,
+                      loader_train_combine,
+                      transforms.RandomCrop(train_pp_cfg.input_size[1:], padding=train_pp_cfg.pad),
+                      0,
+                      substitute=True)
+    if not args.no_aug and train_pp_cfg.pad > 0 and not args.rand_crop:
         add_transform(args, normalize_in_transform, loader_train, loader_train_combine,
                       transforms.Pad(train_pp_cfg.pad), 0)
-    if train_pp_cfg.rand_rotation > 0:
-         add_transform(args, normalize_in_transform, loader_train, loader_train_combine,
+    if not args.no_aug and train_pp_cfg.rand_rotation > 0:
+        add_transform(args, normalize_in_transform, loader_train, loader_train_combine,
                       transforms.RandomRotation(train_pp_cfg.rand_rotation), -1)
 
     if args.reprob > 0 and train_aug_cfg is not None and not train_pp_cfg.normalize:
@@ -276,18 +284,34 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
     return data_config, loader_eval, loader_train
 
 
-def add_transform(args, normalize_in_transform, loader_train, loader_train_combine, transform, position):
-    loader_train.dataset.transform.transforms.insert(position, transform)
+def add_transform(args,
+                  normalize_in_transform,
+                  loader_train,
+                  loader_train_combine,
+                  transform,
+                  position,
+                  substitute=False):
+    if substitute:
+
+        def insertion_function(transforms_list):
+            transforms_list[position] = transform
+    else:
+
+        def insertion_function(transforms_list):
+            transforms_list.insert(position, transform)
+
+    insertion_function(loader_train.dataset.transform.transforms)
+
     if normalize_in_transform and args.aug_splits > 0:
         assert isinstance(loader_train.dataset, AugMixDataset)
         assert loader_train.dataset.normalize is not None
-        loader_train.dataset.normalize.transforms.insert(position, transform)
+        insertion_function(loader_train.dataset.normalize.transforms)
     if loader_train_combine is not None:
         loader_train_combine.dataset.transform.transforms.insert(position, transform)
         if normalize_in_transform and args.aug_splits > 0:
             assert isinstance(loader_train_combine.dataset, AugMixDataset)
             assert loader_train_combine.dataset.normalize is not None
-            loader_train_combine.dataset.normalize.transforms.insert(position, transform)
+            insertion_function(loader_train_combine.dataset.normalize.transforms)
 
 
 def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):

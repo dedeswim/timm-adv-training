@@ -297,6 +297,7 @@ parser.add_argument('--ratio',
                     metavar='RATIO',
                     help='Random resize aspect ratio (default: 0.75 1.33)')
 parser.add_argument("--rand-rotation", type=float, default=0, metavar='DEGREES', help="Random rotation angle")
+parser.add_argument("--rand-crop", action='store_true', default=False, help="Use random crop instead of resize")
 parser.add_argument('--pad',
                     type=int,
                     default=0,
