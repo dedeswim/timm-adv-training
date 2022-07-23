@@ -86,7 +86,7 @@ no_normalize: false
 no_resume_opt: false
 normalize_model: true
 num_classes: 10
-opt: sgd
+opt: momentum
 opt_betas: null
 opt_eps: 1.0e-8
 output: /p/gpfs1/robustHW
