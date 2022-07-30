@@ -15,6 +15,7 @@ from typing import Optional, Tuple
 import torch
 import torch.nn as nn
 from codecarbon import EmissionsTracker
+from deepspeed.profiling.flops_profiler import FlopsProfiler
 from timm.bits import (AccuracyTopK, AvgTensor, DeviceEnv, Monitor, Tracker, TrainServices, TrainState)
 
 from src import utils
@@ -42,6 +43,9 @@ def train_one_epoch(
     loss_meter = AvgTensor()
     accuracy_meter = AccuracyTopK(topk=(1, ))
     robust_accuracy_meter = AccuracyTopK(topk=(1, ))
+
+    prof = FlopsProfiler(state.model)
+    prof.start_profile()
 
     state.model.train()
     state.updater.reset()  # zero-grad
@@ -86,7 +90,19 @@ def train_one_epoch(
 
     emissions: float = co2tracker.stop()
     #energy_consumed:float = co2tracker.stop()
-    f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}\n")
+
+    prof.stop_profile()
+    flops = prof.get_total_flops()
+    training_flops = flops * 3 * 1e-12
+    prof.end_profile()
+
+    gpu_hours = start.elapsed_time(end) * 1e-3 / 3600
+    cloud_dollar_cost_lower_bound = 0.43 * 4 * gpu_hours # use 4 GPUs
+    cloud_dollar_cost_upper_bound = 1.46 * 4 * gpu_hours # use 4 GPUs
+    electricity_dollar_cost = 0.12 * (300 * 4 * gpu_hours / 1000) * 1.58 # use 4 GPUs    
+
+    #f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}\n")
+    f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}; FLOPS (T): {training_flops}; gpu_hour (h): {gpu_hours}; cloud_computing_cost ($): {cloud_dollar_cost_lower_bound, cloud_dollar_cost_upper_bound}; electricity_cost ($): {electricity_dollar_cost}\n")
     f.close()
     #co2tracker.stop()
 
@@ -94,7 +110,9 @@ def train_one_epoch(
     return OrderedDict([('loss', loss_meter.compute().item()), ('top1', top1.item()),
                         ('robust_top1', robust_top1.item()), ('eps', state.eps_schedule(state.epoch)),
                         ('lr', state.updater.get_average_lr()), ('latency', start.elapsed_time(end)),
-                        ('emissions', emissions)])
+                        ('emissions', emissions), ('flops', training_flops),
+                        ('cloud_computing_cost_lb', cloud_dollar_cost_lower_bound), ('cloud_computing_cost_ub', cloud_dollar_cost_upper_bound),
+                        ('electricity_cost', electricity_dollar_cost)])
 
 
 def after_train_step(
