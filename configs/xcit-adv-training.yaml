@@ -100,7 +100,7 @@ smoothing: 0.1
 split_bn: false
 start_epoch: null
 std: null
-sync_bn: false
+sync_bn: true
 torchscript: false
 train_interpolation: bicubic
 train_split: train
