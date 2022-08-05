@@ -1,5 +1,7 @@
 import argparse
+import json
 import math
+from pathlib import Path
 
 import timm
 import torch
@@ -43,6 +45,10 @@ parser.add_argument('--std',
                     metavar='STD',
                     help='Override std deviation of of dataset')
 parser.add_argument("--gpus", default=1, type=int, help="Number of GPUs to use")
+parser.add_argument("--log-to-file",
+                    action='store_true',
+                    default=True,
+                    help='Logs results to a file in the same directory as the checkpoint')
 
 
 def main(args):
@@ -112,13 +118,22 @@ def main(args):
         #n_examples=256,
         threat_model=args.threat_model)
 
+    results_dict = {'top1': clean_acc * 100, 'robust_top1': robust_acc * 100}
+
     if args.log_wandb:
         args.attack_eps = args.eps / 255
         args.attack_steps = None
         args.attack = "autoattack"
         args.attack_norm = args.threat_model.lower()  # .lower() to comply with training convention
-        results_dict = {'top1': clean_acc * 100, 'robust_top1': robust_acc * 100}
         log_results_to_wandb(args, results_dict)
+
+    if args.log_to_file:
+        checkpoint_path = Path(args.checkpoint)
+        base_path = checkpoint_path.parents[0]
+        checkpoint_name = checkpoint_path.stem.split(".")[0]
+        destinaton_file = base_path / f"aa_results-{checkpoint_name}.json"
+        with open(destinaton_file) as f:
+            f.write(json.dumps(results_dict))
 
 
 if __name__ == "__main__":
