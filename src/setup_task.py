@@ -465,6 +465,7 @@ def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
                                                  args.trades_beta,
                                                  dev_env,
                                                  model.num_classes,
+                                                 train_state.updater.optimizer,
                                                  eval_mode=not dev_env.type_xla)
         else:
             raise ValueError("Adversarial training mode not supported")

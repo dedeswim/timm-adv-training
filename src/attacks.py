@@ -254,6 +254,7 @@ class TRADESLoss(nn.Module):
                  beta: float,
                  dev_env: DeviceEnv,
                  num_classes: int,
+                 optimizer: torch.optim.Optimizer,
                  eval_mode: bool = False):
         super().__init__()
         self.attack = make_train_attack(attack_cfg.name,
@@ -273,6 +274,7 @@ class TRADESLoss(nn.Module):
         self.kl_criterion = nn.KLDivLoss(reduction="sum")
         self.beta = beta
         self.eval_mode = eval_mode
+        self.optimizer = optimizer
 
     def forward(self, model: nn.Module, x: torch.Tensor, y: torch.Tensor,
                 epoch: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -284,6 +286,8 @@ class TRADESLoss(nn.Module):
         output_softmax = F.softmax(model(x.detach()), dim=-1)
         x_adv = self.attack(model, x, output_softmax, epoch)
         model.train()
+
+        self.optimizer.zero_grad()
         logits, logits_adv = model(x), model(x_adv)
         loss_natural = self.natural_criterion(logits, y)
         loss_robust = (1.0 / batch_size) * self.kl_criterion(F.log_softmax(logits_adv, dim=1),
