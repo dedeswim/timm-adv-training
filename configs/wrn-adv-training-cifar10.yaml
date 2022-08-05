@@ -118,7 +118,7 @@ std:
 - 0.2023
 - 0.1994
 - 0.2010
-sync_bn: false
+sync_bn: true
 torchscript: false
 train_interpolation: bicubic
 train_split: train
