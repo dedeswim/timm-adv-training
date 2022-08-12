@@ -194,7 +194,6 @@ class CombinedLoaders:
 
 
 def write_wandb_info(notes: str, output_dir: str, wandb_run):
-    import tensorflow as tf
     assert output_dir is not None
     # Log run notes and *true* output dir to wandb
     if output_dir.startswith("gs://"):
@@ -207,8 +206,13 @@ def write_wandb_info(notes: str, output_dir: str, wandb_run):
     wandb_run.notes = notes
     wandb_run_field = f"wandb_run: {wandb_run.url}\n"  # type: ignore
     # Log wandb run url to args file
-    with tf.io.gfile.GFile(os.path.join(output_dir, 'args.yaml'), 'a') as f:
-        f.write(wandb_run_field)
+    if output_dir.startswith("gs://"):
+        import tensorflow as tf
+        with tf.io.gfile.GFile(os.path.join(output_dir, 'args.yaml'), 'a') as f:
+            f.write(wandb_run_field)
+    else:
+        with open(os.path.join(output_dir, 'args.yaml'), 'a') as f:
+            f.write(wandb_run_field)
 
 
 def interpolate_position_embeddings(model: nn.Module, checkpoint_model: Dict[str, Any]):
