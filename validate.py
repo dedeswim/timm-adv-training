@@ -516,14 +516,18 @@ def main():
 
 def log_results_to_wandb(args: argparse.Namespace, results: Dict):
     import wandb
-    import tensorflow as tf
 
     # Get args file from bucket
     assert args.checkpoint.startswith('gs://')
     experiment_dir = os.path.dirname(args.checkpoint)
     args_path = os.path.join(experiment_dir, 'args.yaml')
-    with tf.io.gfile.GFile(args_path, mode='r') as f:
-        config = yaml.safe_load(f)
+    if args_path.startswith("gs://"):
+        import tensorflow as tf
+        with tf.io.gfile.GFile(args_path, mode='r') as f:
+            config = yaml.safe_load(f)
+    else:
+        with open(args_path, mode="r") as f:
+            config = yaml.safe_load(f)
     wandb_run_url = config["wandb_run"]
     # Get run identifying info
     if wandb_run_url.endswith('/'):
