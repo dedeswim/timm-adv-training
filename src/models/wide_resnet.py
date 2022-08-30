@@ -31,6 +31,7 @@ def _cfg(url='', **kwargs):
 default_cfgs = {
     'wide_resnet28_10': _cfg(),
     'wide_resnet34_10': _cfg(),
+    'wide_resnet34_10_trades': _cfg(),
     'wide_resnet34_20': _cfg(),
     'wide_resnet70_16': _cfg(),
     'wide_resnet106_16': _cfg(),
@@ -80,7 +81,7 @@ class NetworkBlock(nn.Module):
 
 
 class WideResNet(nn.Module):
-    """ Based on code from https://github.com/yaodongyu/TRADES """
+    """Based on code from https://github.com/yaodongyu/TRADES """
     def __init__(self,
                  depth=28,
                  num_classes=10,
@@ -154,6 +155,12 @@ def wide_resnet28_10(pretrained=False, **kwargs):
 def wide_resnet34_10(pretrained=False, **kwargs):
     model_args = dict(depth=34, widen_factor=10, **kwargs)
     return _create_wide_resnet('wide_resnet34_10', pretrained, **model_args)
+
+
+@register_model
+def wide_resnet34_10_trades(pretrained=False, **kwargs):
+    model_args = dict(depth=34, widen_factor=10, sub_block1=True, **kwargs)
+    return _create_wide_resnet('wide_resnet34_10_trades', pretrained, **model_args)
 
 
 @register_model

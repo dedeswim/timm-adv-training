@@ -1,6 +1,5 @@
 from collections import OrderedDict
-from timm.models import cait, resnet, vision_transformer, xcit
-from timm.models.helpers import build_model_with_cfg
+from timm.models import resnet, vision_transformer, xcit
 from timm.models.registry import register_model
 from torch import nn
 
