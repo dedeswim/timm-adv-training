@@ -25,7 +25,7 @@ parser.add_argument('--checkpoint', default=None, type=str, metavar='PATH')
 parser.add_argument('--model', default=None, type=str, metavar='NAME')
 parser.add_argument('--batch-size', default=512, type=int, metavar='N')
 parser.add_argument('--num-classes', default=10, type=int, metavar='N')
-parser.add_argument('--eps', default=8, type=int)
+parser.add_argument('--eps', default=8, type=float)
 parser.add_argument('--threat-model', default="Linf", type=str, metavar='MODEL')
 parser.add_argument('--log-wandb',
                     action='store_true',
