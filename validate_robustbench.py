@@ -121,7 +121,7 @@ def main(args):
         base_path = checkpoint_path.parents[0]
         checkpoint_name = checkpoint_path.stem.split(".")[0]
         destinaton_file = base_path / f"aa_results-{checkpoint_name}-{args.eps}.json"
-        with open(destinaton_file) as f:
+        with open(destinaton_file, "w") as f:
             f.write(json.dumps(results_dict))
 
 

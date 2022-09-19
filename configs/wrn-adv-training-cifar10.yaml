@@ -82,6 +82,7 @@ model_ema: false
 model_ema_decay: 0.999
 momentum: 0.9
 no_aug: false
+no_filter_wd: true
 no_normalize: false
 no_resume_opt: false
 normalize_model: true

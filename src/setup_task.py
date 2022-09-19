@@ -411,12 +411,15 @@ def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
             tf.io.gfile.copy(args.resume, resume_checkpoint_path)
         else:
             resume_checkpoint_path = args.resume
+            
+        optimizer_cfg = optimizer_kwargs(cfg=args)
+        optimizer_cfg["filter_bias_and_bn"] = not args.no_filter_wd
 
         train_state = setup_model_and_optimizer(
             dev_env=dev_env,
             model=model,
             optimizer=args.opt,
-            optimizer_cfg=optimizer_kwargs(cfg=args),
+            optimizer_cfg=optimizer_cfg,
             clip_fn=args.clip_mode if args.clip_grad is not None else None,
             clip_value=args.clip_grad,
             model_ema=args.model_ema,
