@@ -158,7 +158,10 @@ parser.add_argument('--momentum',
                     metavar='M',
                     help='Optimizer momentum (default: 0.9)')
 parser.add_argument('--weight-decay', type=float, default=0.0001, help='weight decay (default: 0.0001)')
-parser.add_argument('--no-filter-wd', type=bool, default=False, action='store_true', help='filter weight decay (default: False)')
+parser.add_argument('--no-filter-wd',
+                    action='store_true',
+                    default=False,
+                    help='Disable filtering bias and bn from weight decay penalization (default: False)')
 parser.add_argument('--clip-grad',
                     type=float,
                     default=None,
@@ -315,7 +318,7 @@ parser.add_argument('--aa',
                     type=str,
                     default=None,
                     metavar='NAME',
-                    help='Use AutoAugment policy. "v0" or "original". (default: None)'),
+                    help='Use AutoAugment policy. "v0" or "original". (default: None)')
 parser.add_argument('--aug-splits',
                     type=int,
                     default=0,
