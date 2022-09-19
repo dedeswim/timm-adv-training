@@ -12,7 +12,7 @@ This script was started from an early version of the PyTorch ImageNet example
 NVIDIA CUDA specific speedups adopted from NVIDIA Apex examples
 (https://github.com/NVIDIA/apex/tree/master/examples/imagenet)
 
-Hacked together by Ross Wightman (https://github.com/rwightman), and edited by
+Hacked together by Ross Wightman (https://github.com/rwightman), ad edited by
 Edoardo Debenedetti (https://github.com/dedeswim) to work with Adversarial Training.
 
 The original training script can be found at
@@ -24,17 +24,19 @@ import shutil
 from dataclasses import replace
 
 import torch.nn as nn
-from timm.bits import Monitor, TrainServices, distribute_bn, initialize_device
+from timm.bits import TrainServices, distribute_bn, initialize_device
 from timm.utils import random_seed, setup_default_logging, unwrap_model
 
 from src import (  # noqa  # Models import needed to register the extra models that are not in timm
     attacks, models, utils)
 from src.arg_parser import parse_args
 from src.engine import evaluate, train_one_epoch
+from src.monitor import Monitor
 from src.setup_task import (resolve_attack_cfg, setup_checkpoints_output, setup_data, setup_train_task,
                             update_state_with_norm_model)
 
 _logger = logging.getLogger('train')
+
 
 def main():
     setup_default_logging()
@@ -79,12 +81,14 @@ def main():
             vars(args), args_text, data_config, eval_metric)
 
     services = TrainServices(
-        monitor=Monitor(output_dir=output_dir,
-                        logger=_logger,
-                        hparams=vars(args),
-                        output_enabled=dev_env.primary,
-                        experiment_name=args.experiment,
-                        log_wandb=args.log_wandb and dev_env.global_primary),
+        monitor=Monitor(
+            output_dir=output_dir,  # type: ignore
+            logger=_logger,
+            hparams=vars(args),
+            output_enabled=dev_env.primary,
+            experiment_name=args.experiment,
+            log_wandb=args.log_wandb and dev_env.global_primary,
+            log_tensorboard=args.log_tensorboard and dev_env.global_primary),
         checkpoint=checkpoint_manager,  # type: ignore
     )
 
@@ -111,7 +115,8 @@ def main():
         eval_attack = None
 
     if dev_env.global_primary:
-        _logger.info('Starting training, the first steps may take a long time if running on XLA due to compilation')
+        _logger.info(
+            'Starting training, the first steps may take a long time if running on XLA due to compilation')
 
     try:
         for epoch in range(train_state.epoch, train_cfg.num_epochs):

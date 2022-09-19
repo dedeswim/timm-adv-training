@@ -498,6 +498,10 @@ parser.add_argument('--log-wandb',
                     action='store_true',
                     default=False,
                     help='log training and validation metrics to wandb')
+parser.add_argument('--log-tensorboard',
+                    action='store_true',
+                    default=False,
+                    help='log training and validation metrics to TensorBoard')
 parser.add_argument('--run-notes', default='', type=str, help='Description about this run')
 
 # Adversarial training arguments
