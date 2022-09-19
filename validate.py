@@ -518,7 +518,6 @@ def log_results_to_wandb(args: argparse.Namespace, results: Dict):
     import wandb
 
     # Get args file from bucket
-    assert args.checkpoint.startswith('gs://')
     experiment_dir = os.path.dirname(args.checkpoint)
     args_path = os.path.join(experiment_dir, 'args.yaml')
     if args_path.startswith("gs://"):
