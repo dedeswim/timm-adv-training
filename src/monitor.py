@@ -16,6 +16,7 @@ try:
     HAS_TB = True
 except ImportError as e:
     HAS_TB = False
+    SummaryWriter = None
 
 try:
     import wandb
@@ -117,7 +118,7 @@ class Monitor:
             self.csv_writer = None
 
         # Setup Tensorboard
-        if log_tensorboard:
+        if log_tensorboard and SummaryWriter is not None:
             self.summary_writer = SummaryWriter(log_dir=output_dir)
         else:
             self.summary_writer = None  # FIXME tensorboard
