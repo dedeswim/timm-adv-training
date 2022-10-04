@@ -534,7 +534,12 @@ def setup_checkpoints_output(args: Dict[str, Any], args_text: str, data_config: 
             str(data_config['input_size'][-1])
         ])
 
-    output_dir = utils.get_outdir(args["output"] if args["output"] else './output/train', exp_name, inc=True)
+    # If we resume from a checkpoint, we want to use the same output directory
+    if args["resume"]:
+        output_dir = os.path.dirname(args["resume"])
+    else:
+        output_dir = utils.get_outdir(args["output"] if args["output"] else './output/train', exp_name, inc=True)
+
     if output_dir.startswith("gs://"):
         checkpoints_dir = utils.get_outdir('./output/tmp/', exp_name, inc=True)
         _logger.info(f"Temporarily saving checkpoints in {checkpoints_dir}")
