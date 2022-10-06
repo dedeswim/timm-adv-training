@@ -27,8 +27,8 @@ do
     do
       EXPERIMENT_DIR=${EXPERIMENT}_${m}_${a}_${s}
       {
-        bsub -o logs/${m}_${a}_${s}_train_%J.out -nnodes 1 -W $BTIME -G $BBANK python -m torch.distributed.run --nproc_per_node=4 --master_port=6712 train.py ${DATA_DIR} --config=$BASE_CONFIG --experiment=$EXPERIMENT_DIR --mean $MEAN --std $STD --model=$m --adv-training=$a --attack-steps=$s --batch-size=$TRAIN_BATCH_SIZE
-	# bsub -o logs/${m}_${a}_${s}_aa_%J.out -nnodes 1 -W $BTIME -G $BBANK python validate_robustbench.py --data-dir=$DATA_DIR --model=$m --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS
+        sh scripts/chainer_main.sh "-m torch.distributed.run --nproc_per_node=4 --master_port=6712 train.py" "${DATA_DIR} --config=$BASE_CONFIG --experiment=$EXPERIMENT_DIR --mean $MEAN --std $STD --model=$m --adv-training=$a --attack-steps=$s --batch-size=$TRAIN_BATCH_SIZE" $OUTPUT_DIR $EXPERIMENT_DIR train
+        # sh scripts/chainer_main.sh validate_robustbench.py "--data-dir=$DATA_DIR --model=$m --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS" $OUTPUT_DIR $EXPERIMENT_DIR aa
       } &
     done
   done

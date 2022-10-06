@@ -15,7 +15,7 @@ export EXP_OUT_DIR="$3"
 export EXP_NAME="$4"
 export TRAIN_OR_AA="$5"
 # name of the chain: for logging files and job names
-export CHAINNAME=chain_${TRAINSCRIPT}_config_and_iter_${EXP_NAME}
+export CHAINNAME=chain_${TRAIN_OR_AA}_config_and_iter_${EXP_NAME}
 # script with specific environment settings for the job
 export STARTSCRIPT=scripts/chainer_recursion.sh
 # bank to use for the job allocation
@@ -50,7 +50,7 @@ if [ $# -eq 6 ]; then
 
   name="${CHAINNAME}_${currcount}"
   dep_name="${CHAINNAME}_${lastcount}"
-  outputname="${name}_${TRAIN_OR_AA}_%J"
+  outputname="${name}_%J"
   # Add the checkpoint to resume to the training config if we are at the first repeat
   if [ $repeat -eq 1 ]; then
     TRAINCONFIG="$TRAINCONFIG --resume $EXP_OUT_DIR/$EXP_NAME/last.pth.tar"

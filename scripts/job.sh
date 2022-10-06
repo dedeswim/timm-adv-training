@@ -1,5 +1,5 @@
-declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20")
-declare -a adv_training_techniques=("pgd")
+declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10")
+declare -a adv_training_techniques=("trades")
 declare -a attack_steps=("1" "2" "5" "7" "10")
 
 export DATASET=cifar10
