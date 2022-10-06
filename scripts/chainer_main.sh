@@ -11,9 +11,9 @@ export NNODES=1
 export TRAINSCRIPT=$1
 # train config, should be a string as used in the python cmd line argument like "--arg1=5 --arg2=6"
 export TRAINCONFIG="$2"
-echo "TRAINCONFIG=$TRAINCONFIG"
 export EXP_OUT_DIR="$3"
 export EXP_NAME="$4"
+export TRAIN_OR_AA="$5"
 # name of the chain: for logging files and job names
 export CHAINNAME=chain_${TRAINSCRIPT}_config_and_iter_${EXP_NAME}
 # script with specific environment settings for the job
@@ -32,12 +32,12 @@ if [ $# -lt 2 ]; then
   exit 0
 fi
 
-if [ $# -gt 5 ]; then
+if [ $# -gt 6 ]; then
   echo "Number of arguments not expected. Exiting.."
   exit 0
 fi
 
-if [ $# -eq 5 ]; then
+if [ $# -eq 6 ]; then
   # Arguments: sh chainer.sh TRAINSCRIPT TRAINCONFIG repeat
   # if there's an argument to chainer.sh script: sh chainer arg0
   # meaning, there was a job running before this one
@@ -50,7 +50,7 @@ if [ $# -eq 5 ]; then
 
   name="${CHAINNAME}_${currcount}"
   dep_name="${CHAINNAME}_${lastcount}"
-  outputname="${name}_%J"
+  outputname="${name}_${TRAIN_OR_AA}_%J"
   # Add the checkpoint to resume to the training config if we are at the first repeat
   if [ $repeat -eq 1 ]; then
     TRAINCONFIG="$TRAINCONFIG --resume $EXP_OUT_DIR/$EXP_NAME/last.pth.tar"
@@ -59,7 +59,7 @@ if [ $# -eq 5 ]; then
   CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir $BOUTDIR -oo ${BOUTDIR}/${outputname}.out -w ended(${dep_name})"
 fi
 
-if [ $# -eq 4 ]; then
+if [ $# -eq 5 ]; then
   # Arguments: sh chainer.sh TRAINSCRIPT TRAINCONFIG
   # if there's not an argument to chainer.sh script: sh chainer
   currcount=0
@@ -68,5 +68,5 @@ if [ $# -eq 4 ]; then
   CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir $BOUTDIR -oo ${BOUTDIR}/${outputname}.out"
 fi
 
-echo "chainer main: $CMD sh $STARTSCRIPT $TRAINSCRIPT \"$TRAINCONFIG\" $currcount"
-$CMD sh $STARTSCRIPT $TRAINSCRIPT "$TRAINCONFIG" $EXP_OUT_DIR $EXP_NAME $currcount
+echo "chainer main: $CMD sh $STARTSCRIPT \"$TRAINSCRIPT\" \"$TRAINCONFIG\" $EXP_OUT_DIR $EXP_NAME $TRAIN_OR_AA $currcount"
+$CMD sh $STARTSCRIPT "$TRAINSCRIPT" "$TRAINCONFIG" $EXP_OUT_DIR $EXP_NAME $TRAIN_OR_AA $currcount
