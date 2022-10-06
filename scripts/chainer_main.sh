@@ -25,7 +25,7 @@ export BTIME=12:00
 # outdir of the logs
 export BOUTDIR=logs
 
-repeat=$5
+repeat=$6
 
 if [ $# -lt 2 ]; then
   echo "Number of arguments not expected. Exiting.."
