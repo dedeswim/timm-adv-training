@@ -52,7 +52,7 @@ if [ $# -eq 6 ]; then
   dep_name="${CHAINNAME}_${lastcount}"
   outputname="${name}_%J"
   # Add the checkpoint to resume to the training config if we are at the first repeat
-  if [ $repeat -eq 1 ]; then
+  if [ $currcount -eq 1 ]; then
     TRAINCONFIG="$TRAINCONFIG --resume $EXP_OUT_DIR/$EXP_NAME/last.pth.tar"
   fi
 
