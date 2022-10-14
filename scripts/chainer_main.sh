@@ -4,7 +4,7 @@
 # or Arguments: sh chainer.sh TRAINSCRIPT TRAINCONFIG repeat
 
 # max number of jobs to chain
-export MAX=3
+export MAX=6
 # number of nodes, we need to specify here instead of in the submit.sh job
 export NNODES=1
 # train script, should just be a filename. `python $TRAINSCRIPT`

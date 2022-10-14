@@ -29,8 +29,8 @@ data_dir: /p/vast1/MLdata
 dataset: torch/cifar10
 decay_epochs: null
 decay_milestones:
-- 50
-- 100
+- 75
+- 90
 decay_rate: 0.1
 dist_bn: reduce
 drop: 0.0
