@@ -31,7 +31,8 @@ def train_one_epoch(
 
     f = open("stats.txt", "a")
     
-    services.co2_tracker.start()
+    if services.co2_tracker is not None:
+        services.co2_tracker.start()
 
     start = torch.cuda.Event(enable_timing=True)
     end = torch.cuda.Event(enable_timing=True)
@@ -87,7 +88,10 @@ def train_one_epoch(
     end.record()
     torch.cuda.synchronize()
 
-    emissions: float = services.co2_tracker.stop()  # type: ignore
+    if services.co2_tracker is not None:
+        emissions: float = services.co2_tracker.stop()  # type: ignore
+    else:
+        emissions = float("NaN")
 
     prof.stop_profile()
     flops = prof.get_total_flops()
