@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 import timm
 import torch
 import torch.nn.functional as F
+from codecarbon import EmissionsTracker
 from timm import bits
 from timm.data import PreprocessCfg
 from timm.data.fetcher import Fetcher
@@ -248,3 +249,12 @@ def adapt_model_patches(model: xcit.XCiT, new_patch_size: int):
         model.patch_embed.proj[conv_index][0].stride = (1, 1)
     model.patch_embed.patch_size = new_patch_size
     return model
+
+
+@dataclasses.dataclass
+class TrainServices:
+    """ Train Loop Services
+    """
+    monitor: bits.Monitor = None
+    checkpoint: bits.CheckpointManager = None
+    co2_tracker: EmissionsTracker = None

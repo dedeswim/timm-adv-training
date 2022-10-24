@@ -24,15 +24,14 @@ from src.attacks import AttackFn
 
 def train_one_epoch(
     state: utils.AdvTrainState,
-    services: TrainServices,
+    services: utils.TrainServices,
     loader,
     dev_env: DeviceEnv,
 ):
 
     f = open("stats.txt", "a")
-
-    co2tracker = EmissionsTracker(log_level="warning")
-    co2tracker.start()
+    
+    services.co2_tracker.start()
 
     start = torch.cuda.Event(enable_timing=True)
     end = torch.cuda.Event(enable_timing=True)
@@ -88,8 +87,7 @@ def train_one_epoch(
     end.record()
     torch.cuda.synchronize()
 
-    emissions: float = co2tracker.stop()
-    #energy_consumed:float = co2tracker.stop()
+    emissions: float = services.co2_tracker.stop()  # type: ignore
 
     prof.stop_profile()
     flops = prof.get_total_flops()

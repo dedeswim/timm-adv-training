@@ -24,7 +24,8 @@ import shutil
 from dataclasses import replace
 
 import torch.nn as nn
-from timm.bits import TrainServices, distribute_bn, initialize_device
+from codecarbon import EmissionsTracker
+from timm.bits import distribute_bn, initialize_device
 from timm.utils import random_seed, setup_default_logging, unwrap_model
 
 from src import (  # noqa  # Models import needed to register the extra models that are not in timm
@@ -80,7 +81,7 @@ def main():
         checkpoint_manager, output_dir, checkpoints_dir = setup_checkpoints_output(
             vars(args), args_text, data_config, eval_metric)
 
-    services = TrainServices(
+    services = utils.TrainServices(
         monitor=Monitor(
             output_dir=output_dir,  # type: ignore
             logger=_logger,
@@ -90,6 +91,7 @@ def main():
             log_wandb=args.log_wandb and dev_env.global_primary,
             log_tensorboard=args.log_tensorboard and dev_env.global_primary),
         checkpoint=checkpoint_manager,  # type: ignore
+        co2_tracker=EmissionsTracker(output_dir=output_dir)  # type: ignore
     )
 
     if (wandb_run := services.monitor.wandb_run) is not None:
