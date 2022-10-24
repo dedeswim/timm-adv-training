@@ -76,10 +76,13 @@ def main():
     checkpoint_manager = None
     output_dir = None
     checkpoints_dir = None
+    co2_tracker: EmissionsTracker | None = None
 
     if dev_env.global_primary:
         checkpoint_manager, output_dir, checkpoints_dir = setup_checkpoints_output(
             vars(args), args_text, data_config, eval_metric)
+        assert output_dir is not None
+        co2_tracker = EmissionsTracker(output_dir=output_dir)  # type: ignore
 
     services = utils.TrainServices(
         monitor=Monitor(
@@ -91,7 +94,7 @@ def main():
             log_wandb=args.log_wandb and dev_env.global_primary,
             log_tensorboard=args.log_tensorboard and dev_env.global_primary),
         checkpoint=checkpoint_manager,  # type: ignore
-        co2_tracker=EmissionsTracker(output_dir=output_dir)  # type: ignore
+        co2_tracker=co2_tracker  # type: ignore
     )
 
     if (wandb_run := services.monitor.wandb_run) is not None:
