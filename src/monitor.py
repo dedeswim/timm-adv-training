@@ -97,16 +97,15 @@ def _add_kwargs(text_update, name_map=None, **kwargs):
 
 class Monitor:
 
-    def __init__(
-        self,
-        experiment_name=None,
-        output_dir=None,
-        logger=None,
-        hparams=None,
-        log_wandb=False,
-        output_enabled=True,
-        log_tensorboard=False,
-    ):
+    def __init__(self,
+                 experiment_name=None,
+                 output_dir=None,
+                 logger=None,
+                 hparams=None,
+                 log_wandb=False,
+                 output_enabled=True,
+                 log_tensorboard=False,
+                 wandb_project: Optional[str] = None):
         self.output_dir = output_dir  # for tensorboard, csv, text file (TODO) logging
         self.logger = logger or logging.getLogger('log')
         hparams = hparams or {}
@@ -126,8 +125,9 @@ class Monitor:
         # Setup W&B
         self.wandb_run = None
         if log_wandb:
+            wandb_project = wandb_project or experiment_name
             if HAS_WANDB:
-                self.wandb_run = wandb.init(project=experiment_name, config=hparams)
+                self.wandb_run = wandb.init(project=wandb_project, config=hparams)
             else:
                 _logger.warning("You've requested to log metrics to wandb but package not found. "
                                 "Metrics not being logged to wandb, try `pip install wandb`")
@@ -218,4 +218,3 @@ class Monitor:
             wandb.log(row_dict)
         if self.summary_writer is not None:
             self.summary_writer.add_scalars("", tag_scalar_dict=row_dict, global_step=row_dict["epoch"])
-            

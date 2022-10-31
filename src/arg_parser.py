@@ -498,6 +498,12 @@ parser.add_argument('--log-wandb',
                     action='store_true',
                     default=False,
                     help='log training and validation metrics to wandb')
+parser.add_argument('--wandb-project',
+                    default='',
+                    type=str,
+                    metavar='NAME',
+                    help='The project to use on wandb. Default is what is passed'
+                    'as argument to `--experiment`')
 parser.add_argument('--log-tensorboard',
                     action='store_true',
                     default=False,

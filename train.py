@@ -92,6 +92,7 @@ def main():
             output_enabled=dev_env.primary,
             experiment_name=args.experiment,
             log_wandb=args.log_wandb and dev_env.global_primary,
+            wandb_project=args.wandb_project,
             log_tensorboard=args.log_tensorboard and dev_env.global_primary),
         checkpoint=checkpoint_manager,  # type: ignore
         co2_tracker=co2_tracker  # type: ignore
