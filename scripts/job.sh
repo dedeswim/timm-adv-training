@@ -1,7 +1,7 @@
 declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20")
 declare -a adv_training_techniques=("pgd" "trades")
 declare -a attack_steps=("1" "2" "5" "7" "10")
-declare -a ema_arguments=("--epochs=300 --decay-milestones 200 --model-ema --cutmix 1", "")
+declare -a ema_arguments=("--epochs=300 --decay-milestones 200 --model-ema --cutmix 1." "")
 
 export DATASET=cifar10
 export DATA_DIR=/p/vast1/MLdata
@@ -43,7 +43,7 @@ do
           EXPERIMENT_DIR=${EXPERIMENT}_${m}_${a}_${s}_${is_ema}
           {
             sh scripts/chainer_main.sh "-m torch.distributed.run --nproc_per_node=4 --master_port=6712 train.py" "${DATA_DIR} --config=$BASE_CONFIG --experiment=$EXPERIMENT_DIR --mean $MEAN --std $STD --model=$m --adv-training=$a --attack-steps=$s $TRAIN_BATCH_SIZE_CONFIG $ema" $OUTPUT_DIR $EXPERIMENT_DIR train
-            # bsub -o logs/${m}_${a}_${s}_aa_%J.out -nnodes 1 -W $BTIME -G $BBANK python validate_robustbench.py --data-dir=$DATA_DIR --model=$m --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS
+            # bsub -o logs/${m}_${a}_${s}_${is_ema}_aa_%J.out -nnodes 1 -W $BTIME -G $BBANK python validate_robustbench.py --data-dir=$DATA_DIR --model=$m --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS
           } &
       done
     done

@@ -1,0 +1,1 @@
+python -m torch.distributed.run --nproc_per_node=4 --master_port=6712 train.py /p/vast1/MLdata --dataset torch/cifar10 --experiment test --output /p/gpfs1/robustHW --model wide_resnet28_10 --config configs/wrn-adv-training-cifar10.yaml
