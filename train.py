@@ -84,6 +84,12 @@ def main():
         assert output_dir is not None
         co2_tracker = EmissionsTracker(output_dir=output_dir)  # type: ignore
 
+    # Recover wandb if we are resuming
+    if args.resume and args.log_wandb:
+        _, _, wandb_run_id = utils.get_wandb_run_info(args.resume)
+    else:
+        wandb_run_id = None
+
     services = utils.TrainServices(
         monitor=Monitor(
             output_dir=output_dir,  # type: ignore
@@ -93,6 +99,7 @@ def main():
             experiment_name=args.experiment,
             log_wandb=args.log_wandb and dev_env.global_primary,
             wandb_project=args.wandb_project,
+            wandb_id=wandb_run_id,
             log_tensorboard=args.log_tensorboard and dev_env.global_primary),
         checkpoint=checkpoint_manager,  # type: ignore
         co2_tracker=co2_tracker  # type: ignore

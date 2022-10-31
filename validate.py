@@ -517,23 +517,8 @@ def main():
 def log_results_to_wandb(args: argparse.Namespace, results: Dict):
     import wandb
 
-    # Get args file from bucket
-    experiment_dir = os.path.dirname(args.checkpoint)
-    args_path = os.path.join(experiment_dir, 'args.yaml')
-    if args_path.startswith("gs://"):
-        import tensorflow as tf
-        with tf.io.gfile.GFile(args_path, mode='r') as f:
-            config = yaml.safe_load(f)
-    else:
-        with open(args_path, mode="r") as f:
-            config = yaml.safe_load(f)
-    wandb_run_url = config["wandb_run"]
-    # Get run identifying info
-    if wandb_run_url.endswith('/'):
-        wandb_run_url = wandb_run_url[:-1]
-    wandb_run_project = wandb_run_url.split("/")[4]
-    wandb_run_entity = wandb_run_url.split("/")[3]
-    wandb_run_id = wandb_run_url.split("/")[6]
+    wandb_run_project, wandb_run_entity, wandb_run_id = utils.get_wandb_run_info(args.checkpoint)
+
     run = wandb.init(project=wandb_run_project, id=wandb_run_id, entity=wandb_run_entity, resume=True)
     # Log data
     attack = args.attack

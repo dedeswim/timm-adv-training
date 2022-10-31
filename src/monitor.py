@@ -105,7 +105,8 @@ class Monitor:
                  log_wandb=False,
                  output_enabled=True,
                  log_tensorboard=False,
-                 wandb_project: Optional[str] = None):
+                 wandb_project: Optional[str] = None,
+                 wandb_id: Optional[str] = None):
         self.output_dir = output_dir  # for tensorboard, csv, text file (TODO) logging
         self.logger = logger or logging.getLogger('log')
         hparams = hparams or {}
@@ -127,7 +128,7 @@ class Monitor:
         if log_wandb:
             wandb_project = wandb_project or experiment_name
             if HAS_WANDB:
-                self.wandb_run = wandb.init(project=wandb_project, config=hparams)
+                self.wandb_run = wandb.init(project=wandb_project, config=hparams, id=wandb_id, resume="allow")
             else:
                 _logger.warning("You've requested to log metrics to wandb but package not found. "
                                 "Metrics not being logged to wandb, try `pip install wandb`")

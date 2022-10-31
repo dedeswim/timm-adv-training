@@ -3,6 +3,7 @@ import dataclasses
 import glob
 import os
 import tempfile
+import yaml
 from collections import OrderedDict
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
@@ -258,3 +259,26 @@ class TrainServices:
     monitor: bits.Monitor = None
     checkpoint: bits.CheckpointManager = None
     co2_tracker: EmissionsTracker = None
+
+
+def get_wandb_run_info(checkpoint_path) -> Tuple[str, str, str]:
+    # Get args file from bucket
+    experiment_dir = os.path.dirname(checkpoint_path)
+    args_path = os.path.join(experiment_dir, 'args.yaml')
+    if args_path.startswith("gs://"):
+        import tensorflow as tf
+        with tf.io.gfile.GFile(args_path, mode='r') as f:
+            config = yaml.safe_load(f)
+    else:
+        with open(args_path, mode="r") as f:
+            config = yaml.safe_load(f)
+    wandb_run_url = config["wandb_run"]
+
+    # Get run identifying info
+    if wandb_run_url.endswith('/'):
+        wandb_run_url = wandb_run_url[:-1]
+    wandb_run_project = wandb_run_url.split("/")[4]
+    wandb_run_entity = wandb_run_url.split("/")[3]
+    wandb_run_id = wandb_run_url.split("/")[6]
+
+    return wandb_run_project, wandb_run_entity, wandb_run_id
