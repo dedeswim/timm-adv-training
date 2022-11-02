@@ -8,16 +8,15 @@ The original license can be found here:
 https://github.com/deepmind/deepmind-research/blob/master/LICENSE
 """
 
-from collections import OrderedDict
-import copy
 import functools
+import math
 from dataclasses import dataclass
-from typing import Callable, Dict, Generic, Optional, Tuple, TypeVar
+from typing import Callable, Dict, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
 from autoattack import AutoAttack
-from timm.bits import DeviceEnv, Updater
+from timm.bits import DeviceEnv
 from torch import nn
 
 AttackFn = Callable[[nn.Module, torch.Tensor, torch.Tensor], torch.Tensor]
@@ -255,8 +254,8 @@ class TRADESLoss(nn.Module):
                  beta: float,
                  dev_env: DeviceEnv,
                  num_classes: int,
-                 updater: Updater,
-                 eval_mode: bool = True):
+                 optimizer: torch.optim.Optimizer,
+                 eval_mode: bool = False):
         super().__init__()
         self.attack = make_train_attack(attack_cfg.name,
                                         attack_cfg.eps_schedule,
@@ -275,7 +274,7 @@ class TRADESLoss(nn.Module):
         self.kl_criterion = nn.KLDivLoss(reduction="sum")
         self.beta = beta
         self.eval_mode = eval_mode
-        self.updater = updater
+        self.optimizer = optimizer
 
     def forward(self, model: nn.Module, x: torch.Tensor, y: torch.Tensor,
                 epoch: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -288,103 +287,10 @@ class TRADESLoss(nn.Module):
         x_adv = self.attack(model, x, output_softmax, epoch)
         model.train()
 
-        self.updater.reset()
+        self.optimizer.zero_grad()
         logits, logits_adv = model(x), model(x_adv)
         loss_natural = self.natural_criterion(logits, y)
         loss_robust = (1.0 / batch_size) * self.kl_criterion(F.log_softmax(logits_adv, dim=1),
                                                              F.softmax(logits, dim=1))
         loss = loss_natural + self.beta * loss_robust
-        return loss, logits, logits_adv
-
-
-M = TypeVar("M", bound=nn.Module)
-
-
-def diff_in_weights(model, proxy):
-    """From
-    https://github.com/csdongxian/AWP/blob/a7acf5d842fccf1bbb4b91644352ce157d370a26/AT_AWP/utils_awp.py#L8"""
-    diff_dict = OrderedDict()
-    model_state_dict = model.state_dict()
-    proxy_state_dict = proxy.state_dict()
-    for (old_k, old_w), (new_k, new_w) in zip(model_state_dict.items(), proxy_state_dict.items()):
-        if len(old_w.size()) <= 1:
-            continue
-        if 'weight' in old_k:
-            diff_w = new_w - old_w
-            diff_dict[old_k] = old_w.norm() / (diff_w.norm() + EPS) * diff_w
-    return diff_dict
-
-
-def add_into_weights(model, diff, coeff=1.0):
-    """From
-    https://github.com/csdongxian/AWP/blob/a7acf5d842fccf1bbb4b91644352ce157d370a26/AT_AWP/utils_awp.py#L22"""
-    names_in_diff = diff.keys()
-    with torch.no_grad():
-        for name, param in model.named_parameters():
-            if name in names_in_diff:
-                param.add_(coeff * diff[name])
-
-
-def perturb(model, diff, gamma):
-    add_into_weights(model, diff, coeff=1.0 * gamma)
-
-
-def restore(model, diff, gamma):
-    add_into_weights(model, diff, coeff=-1.0 * gamma)
-
-
-class AWPLoss(nn.Module, Generic[M]):
-
-    def __init__(self,
-                 attack_cfg: AttackCfg,
-                 natural_criterion: nn.Module,
-                 dev_env: DeviceEnv,
-                 num_classes: int,
-                 proxy_model: M,
-                 updater: Updater,
-                 gamma: float,
-                 eval_mode: bool = True) -> None:
-        super().__init__()
-        self.attack = make_train_attack(attack_cfg.name,
-                                        attack_cfg.eps_schedule,
-                                        attack_cfg.eps,
-                                        attack_cfg.eps_schedule_period,
-                                        attack_cfg.zero_eps_epochs,
-                                        attack_cfg.step_size,
-                                        attack_cfg.steps,
-                                        attack_cfg.norm,
-                                        attack_cfg.boundaries,
-                                        criterion=nn.KLDivLoss(reduction="sum"),
-                                        num_classes=num_classes,
-                                        logits_y=True,
-                                        dev_env=dev_env)
-        self.gamma = gamma
-        self.natural_criterion = natural_criterion
-        self.proxy_model = proxy_model
-        self.eval_mode = eval_mode
-        self.updater = updater
-        proxy_optim = torch.optim.SGD(self.proxy_model.parameters(), lr=0.01)
-        self.proxy_updater = Updater(self.proxy_model, proxy_optim)
-        self.dev_env = dev_env
-
-    def forward(self, model: M, x: torch.Tensor, y: torch.Tensor,
-                epoch: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        # Avoid setting the model in eval mode if on XLA (it crashes)
-        logits = model(x)
-        if self.eval_mode:
-            model.eval()
-        # Find adv. examples
-        x_adv = self.attack(model, x, y, epoch)
-        model.train()
-        # Load model onto the proxy one and compute diff
-        self.proxy_model.load_state_dict(model.state_dict())
-        self.proxy_model.train()
-        loss = self.natural_criterion(self.proxy_model(x_adv), y)
-        self.proxy_updater.apply(loss)
-        model.train()
-        diff = diff_in_weights(model, self.proxy_model)
-        # Apply diff and compute loss
-        perturb(model, diff, self.gamma)
-        logits_adv = model(x_adv)
-        loss = self.natural_criterion(logits_adv, y)
         return loss, logits, logits_adv
