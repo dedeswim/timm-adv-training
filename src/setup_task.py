@@ -468,7 +468,7 @@ def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
                                                  args.trades_beta,
                                                  dev_env,
                                                  model.num_classes,
-                                                 train_state.updater.optimizer,
+                                                 train_state.updater,
                                                  eval_mode=not dev_env.type_xla)
         else:
             raise ValueError("Adversarial training mode not supported")
@@ -552,14 +552,17 @@ def setup_checkpoints_output(args: Dict[str, Any], args_text: str, data_config: 
                                            metric_name=eval_metric,
                                            metric_decreasing=True if eval_metric == 'loss' else False,
                                            max_history=args["checkpoint_hist"])
-
-    if output_dir.startswith("gs://"):
-        import tensorflow as tf
-        with tf.io.gfile.GFile(os.path.join(output_dir, 'args.yaml'), 'w') as f:
-            f.write(args_text)
-    else:
-        with open(os.path.join(output_dir, 'args.yaml'), 'w') as f:
-            f.write(args_text)
+    
+    if not args["resume"]:
+        # Avoid overwriting the args if we are resuming from a previous run
+        if output_dir.startswith("gs://"):
+            import tensorflow as tf
+            with tf.io.gfile.GFile(os.path.join(output_dir, 'args.yaml'), 'w') as f:
+                f.write(args_text)
+        else:
+            with open(os.path.join(output_dir, 'args.yaml'), 'w') as f:
+                f.write(args_text)
+    
     return checkpoint_manager, output_dir, checkpoints_dir
 
 
