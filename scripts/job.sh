@@ -22,9 +22,13 @@ export N_GPUS=4
 for m in "${model_names[@]}"
 do
   if [ "$m" = "wide_resnet34_20" ]; then
-    WRN34_20_TRAIN_BATCH_SIZE=64
+    TRAIN_BATCH_SIZE=64
     VAL_BATCH_SIZE=1024
-    TRAIN_BATCH_SIZE_CONFIG="--batch-size=$WRN34_20_TRAIN_BATCH_SIZE"
+    TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"
+  else if [ "$m" = "wide_resnet70_16" ]; then
+    TRAIN_BATCH_SIZE=32
+    VAL_BATCH_SIZE=512
+    TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"
   else
     TRAIN_BATCH_SIZE_CONFIG=""
     VAL_BATCH_SIZE=2048
