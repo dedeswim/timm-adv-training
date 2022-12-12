@@ -49,6 +49,11 @@ parser.add_argument("--log-to-file",
                     action='store_true',
                     default=True,
                     help='Logs results to a file in the same directory as the checkpoint')
+parser.add_argument('--aa-state-path',
+                    type=Path,
+                    default=None,
+                    metavar='PATH',
+                    help='The path to the AA state. If `None` then no state is used.')
 
 
 def main(args):
@@ -105,7 +110,8 @@ def main(args):
         eps=args.eps / 255,
         preprocessing=preprocessing,
         #n_examples=256,
-        threat_model=args.threat_model)
+        threat_model=args.threat_model,
+        aa_state_path=args.aa_state_path)
 
     results_dict = {'top1': clean_acc * 100, 'robust_top1': robust_acc * 100}
 
