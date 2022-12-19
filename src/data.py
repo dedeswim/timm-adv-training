@@ -2,6 +2,7 @@ from typing import Callable, Optional, Tuple
 
 import numpy as np
 import torch
+from PIL import Image
 from torch.utils.data import Dataset
 
 CIFAR_10_MEAN = (0.4914, 0.4822, 0.4465)
@@ -14,16 +15,16 @@ class DeepMindCIFAR10(Dataset[Tuple[torch.Tensor, torch.Tensor]]):
         self.transform = transform
         with np.load(root_dir) as data:
             self.images = data["image"]
-            self.labels = data["label"]
-            self.length = data["label"].shape
+            self.labels = torch.from_numpy(data["label"])
+            self.length = data["label"].shape[0]
 
     def __len__(self) -> int:
         return self.length
     
     def __getitem__(self, index) -> Tuple[torch.Tensor, torch.Tensor]:
-        image = torch.from_numpy(self.images[index])
+        image = Image.fromarray(self.images[index])
         if self.transform is not None:
             image = self.transform(image)
-        label = torch.from_numpy(self.labels[index])
+        label = self.labels[index]
         return image, label
                 
