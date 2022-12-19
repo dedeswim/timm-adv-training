@@ -29,6 +29,7 @@ from timm.scheduler import create_scheduler
 from torchvision import transforms
 
 from src.attacks import _SCHEDULES, AttackCfg
+from src.data import DeepMindCIFAR10
 from src.iterable_augmix_dataset import IterableAugMixDataset
 from src.random_erasing import NotNormalizedRandomErasing
 
@@ -61,12 +62,16 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
 
     if args.combine_dataset is not None:
         data_dir = args.combine_data_dir or args.data_dir
-        dataset_train_combine = create_dataset(args.combine_dataset,
-                                               root=data_dir,
-                                               split=args.train_split,
-                                               is_training=True,
-                                               batch_size=train_combine_batch_size,
-                                               repeats=args.epoch_repeats)
+        if args.combine_dataset == "deepmind_cifar10":
+            root = f"{data_dir}/synthetic/CIFAR-10/gowal2020/cifar10_ddpm.npz"
+            dataset_train_combine = DeepMindCIFAR10(root)
+        else:
+            dataset_train_combine = create_dataset(args.combine_dataset,
+                                                root=data_dir,
+                                                split=args.train_split,
+                                                is_training=True,
+                                                batch_size=train_combine_batch_size,
+                                                repeats=args.epoch_repeats)
     else:
         dataset_train_combine = None
 
