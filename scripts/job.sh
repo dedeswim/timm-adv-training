@@ -2,7 +2,7 @@ declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wid
 declare -a adv_training_techniques=("pgd" "trades")
 declare -a attack_steps=("1" "2" "5" "7" "10")
 declare -a ema_arguments=("--epochs=300 --decay-milestones 200 --model-ema --cutmix 1." "")
-declare -a synthetic_data_arguments=("--combine-dataset deepmind_cifar10", "")
+declare -a synthetic_data_arguments=("--combine-dataset deepmind_cifar10 --combined-dataset-ratio 0.7", "")
 
 export DATASET=cifar10
 export DATA_DIR=/p/vast1/MLdata
