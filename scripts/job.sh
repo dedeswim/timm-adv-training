@@ -1,11 +1,11 @@
-declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20")
+declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20" "wide_resnet70_16")
 declare -a adv_training_techniques=("pgd" "trades")
 declare -a attack_steps=("1" "2" "5" "7" "10")
 declare -a ema_arguments=("--epochs=300 --decay-milestones 200 --model-ema --cutmix 1." "")
 
 export DATASET=cifar10
 export DATA_DIR=/p/vast1/MLdata
-export BBANK=safeml
+export BBANK=asyncmlb
 export BTIME=12:00
 export BOUTDIR=logs
 export BASE_CONFIG=configs/sweep-cifar10.yaml
@@ -25,7 +25,7 @@ do
     TRAIN_BATCH_SIZE=64
     VAL_BATCH_SIZE=1024
     TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"
-  else if [ "$m" = "wide_resnet70_16" ]; then
+  elif [ "$m" = "wide_resnet70_16" ]; then
     TRAIN_BATCH_SIZE=32
     VAL_BATCH_SIZE=512
     TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"

@@ -4,7 +4,7 @@
 # or Arguments: sh chainer.sh TRAINSCRIPT TRAINCONFIG repeat
 
 # max number of jobs to chain
-export MAX=6
+export MAX=12
 # number of nodes, we need to specify here instead of in the submit.sh job
 export NNODES=1
 # train script, should just be a filename. `python $TRAINSCRIPT`
@@ -19,7 +19,7 @@ export CHAINNAME=chain_${TRAIN_OR_AA}_config_and_iter_${EXP_NAME}
 # script with specific environment settings for the job
 export STARTSCRIPT=scripts/chainer_recursion.sh
 # bank to use for the job allocation
-export BBANK=safeml
+export BBANK=asyncmlb
 # time limit for the job
 export BTIME=12:00
 # outdir of the logs
