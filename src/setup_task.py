@@ -47,6 +47,9 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
 
     if args.combine_dataset is not None:
         train_combine_batch_size = int(args.batch_size * args.combined_dataset_ratio)
+        # Some data augmentations (e.g., MixUp) need an even batch size
+        if train_combine_batch_size % 2 != 0:
+            train_combine_batch_size += 1
         train_batch_size = args.batch_size - train_combine_batch_size
     else:
         train_combine_batch_size = 0  # This is not used in practice
