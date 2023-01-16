@@ -2,7 +2,7 @@ declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wid
 declare -a adv_training_techniques=("pgd" "trades")
 declare -a attack_steps=("1" "2" "5" "7" "10")
 declare -a ema_arguments=("--epochs=300 --decay-milestones 200 --model-ema --cutmix 1." "")
-declare -a synthetic_data_arguments=("--combine-dataset deepmind_cifar10 --combined-dataset-ratio 0.7", "")
+declare -a synthetic_data_arguments=("--combine-dataset deepmind_cifar10 --combined-dataset-ratio 0.7")
 
 export DATASET=cifar10
 export DATA_DIR=/p/vast1/MLdata
@@ -54,8 +54,8 @@ do
           fi
             EXPERIMENT_DIR=${EXPERIMENT}_${m}_${a}_${s}_${is_ema}${is_synthetic}
             {
-              sh scripts/chainer_main.sh "-m torch.distributed.run --nproc_per_node=4 --master_port=6712 train.py" "${DATA_DIR} --config=$BASE_CONFIG --experiment=$EXPERIMENT_DIR --log-wandb --wandb-project=robust-hw --mean $MEAN --std $STD --model=$m --adv-training=$a --attack-steps=$s $TRAIN_BATCH_SIZE_CONFIG $ema $synthetic_data" $OUTPUT_DIR $EXPERIMENT_DIR train
-              # bsub -o logs/${m}_${a}_${s}_${is_ema}_aa_%J.out -nnodes 1 -W $BTIME -G $BBANK python validate_robustbench.py --data-dir=$DATA_DIR --model=$m --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS
+              # sh scripts/chainer_main.sh "-m torch.distributed.run --nproc_per_node=4 --master_port=6712 train.py" "${DATA_DIR} --config=$BASE_CONFIG --experiment=$EXPERIMENT_DIR --log-wandb --wandb-project=robust-hw --mean $MEAN --std $STD --model=$m --adv-training=$a --attack-steps=$s $TRAIN_BATCH_SIZE_CONFIG $ema $synthetic_data" $OUTPUT_DIR $EXPERIMENT_DIR train
+              sh scripts/chainer_main.sh "validate_robustbench.py" "--data-dir=$DATA_DIR --model=$m --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPU" $OUTPUT_DIR $EXPERIMENT_DIR aa 
             } &
         done
       done
