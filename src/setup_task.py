@@ -70,11 +70,11 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
             dataset_train_combine = DeepMindCIFAR10(root)
         else:
             dataset_train_combine = create_dataset(args.combine_dataset,
-                                                root=data_dir,
-                                                split=args.train_split,
-                                                is_training=True,
-                                                batch_size=train_combine_batch_size,
-                                                repeats=args.epoch_repeats)
+                                                   root=data_dir,
+                                                   split=args.train_split,
+                                                   is_training=True,
+                                                   batch_size=train_combine_batch_size,
+                                                   repeats=args.epoch_repeats)
     else:
         dataset_train_combine = None
 
@@ -419,7 +419,7 @@ def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
             tf.io.gfile.copy(args.resume, resume_checkpoint_path)
         else:
             resume_checkpoint_path = args.resume
-            
+
         optimizer_cfg = optimizer_kwargs(cfg=args)
         optimizer_cfg["filter_bias_and_bn"] = not args.no_filter_wd
 
@@ -433,8 +433,7 @@ def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
             model_ema=args.model_ema,
             model_ema_decay=args.model_ema_decay,
             resume_path=resume_checkpoint_path,
-            use_syncbn=args.sync_bn,
-            resume_opt=not args.no_resume_opt)
+            use_syncbn=args.sync_bn)
 
     # setup learning rate schedule and starting epoch
     # FIXME move into updater?
@@ -516,7 +515,7 @@ def setup_train_task(args, dev_env: DeviceEnv, mixup_active: bool):
 
 
 def update_state_with_norm_model(dev_env: DeviceEnv, train_state: TrainState,
-                                 data_config: Dict[str, Any]) -> utils.AdvTrainState:
+                                 data_config: Dict[str, Any]) -> TrainState:
     train_state = replace(train_state,
                           model=utils.normalize_model(train_state.model,
                                                       mean=data_config["mean"],
@@ -526,6 +525,12 @@ def update_state_with_norm_model(dev_env: DeviceEnv, train_state: TrainState,
     if train_state.model_ema is not None:
         assert isinstance(train_state.model_ema, ModelEmaV2)
         new_model_ema = ModelEmaV2(train_state.model, decay=train_state.model_ema.decay)
+        assert isinstance(new_model_ema.module, nn.Sequential)
+        # Put the existing EMA weights into the new EMA model
+        # The new model is a sequential of [normalization, model] and here we substitute
+        # the new model (with non-EMA weights) with the old one. This is necessary when
+        # resuming checkpoints
+        new_model_ema.module[-1] = train_state.model_ema.module
         train_state = replace(train_state, model_ema=dev_env.to_device(new_model_ema))
 
     return train_state
@@ -546,7 +551,9 @@ def setup_checkpoints_output(args: Dict[str, Any], args_text: str, data_config: 
     if args["resume"]:
         output_dir = os.path.dirname(args["resume"])
     else:
-        output_dir = utils.get_outdir(args["output"] if args["output"] else './output/train', exp_name, inc=True)
+        output_dir = utils.get_outdir(args["output"] if args["output"] else './output/train',
+                                      exp_name,
+                                      inc=True)
 
     if output_dir.startswith("gs://"):
         checkpoints_dir = utils.get_outdir('./output/tmp/', exp_name, inc=True)
@@ -560,7 +567,7 @@ def setup_checkpoints_output(args: Dict[str, Any], args_text: str, data_config: 
                                            metric_name=eval_metric,
                                            metric_decreasing=True if eval_metric == 'loss' else False,
                                            max_history=args["checkpoint_hist"])
-    
+
     if not args["resume"]:
         # Avoid overwriting the args if we are resuming from a previous run
         if output_dir.startswith("gs://"):
@@ -570,7 +577,7 @@ def setup_checkpoints_output(args: Dict[str, Any], args_text: str, data_config: 
         else:
             with open(os.path.join(output_dir, 'args.yaml'), 'w') as f:
                 f.write(args_text)
-    
+
     return checkpoint_manager, output_dir, checkpoints_dir
 
 

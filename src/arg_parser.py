@@ -69,10 +69,6 @@ parser.add_argument('--resume',
                     type=str,
                     metavar='PATH',
                     help='Resume full model and optimizer state from checkpoint (default: none)')
-parser.add_argument('--no-resume-opt',
-                    action='store_true',
-                    default=False,
-                    help='prevent resume of optimizer state when resuming model')
 parser.add_argument('--num-classes',
                     type=int,
                     default=None,
