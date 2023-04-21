@@ -162,17 +162,27 @@ class CombinedLoaders:
         assert loader_1.mixup_enabled == loader_2.mixup_enabled
         self._mixup_enabled = loader_1.mixup_enabled
 
+        self.batch_size = loader_1.loader.batch_size + loader_2.loader.batch_size
+        tot_images_1 = len(loader_1.loader.dataset)
+        tot_images_2 = len(loader_2.loader.dataset)
+        self.tot_images = min(tot_images_1, tot_images_2)
+        self.tot_real_batches = self.tot_images // self.batch_size
+
     def __iter__(self):
         return self._iterator()
 
     def __len__(self):
-        return min(len(self.loader_1), len(self.loader_2))
+        return self.tot_real_batches
 
     def _iterator(self):
+        batch_counter = 0
         for (img1, label1), (img2, label2) in zip(self.loader_1, self.loader_2):
+            if batch_counter == self.tot_real_batches:
+                break
             images = torch.cat([img1, img2])
             labels = torch.cat([label1, label2])
             indices = torch.randperm(len(images))
+            batch_counter += 1
             yield images[indices], labels[indices]
 
     @property
