@@ -242,7 +242,8 @@ def evaluate(model: nn.Module,
              phase_suffix: str = '',
              log_interval: int = 10,
              attack: Optional[AttackFn] = None,
-             use_mp_loader: bool = False):
+             use_mp_loader: bool = False,
+             n_samples: Optional[int] = None,):
     tracker = Tracker()
     losses_m = AvgTensor()
     # FIXME move loss and accuracy modules into task specific TaskMetric obj
@@ -253,9 +254,11 @@ def evaluate(model: nn.Module,
 
     end_idx = len(loader) - 1
     tracker.mark_iter()
+    tot_samples = 0
     with torch.no_grad():
         for step_idx, (sample, target) in enumerate(loader):
             tracker.mark_iter_data_end()
+            tot_samples += sample.size(0)
             with dev_env.autocast():
                 output = model(sample)
                 loss = loss_fn(output, target)
@@ -289,6 +292,8 @@ def evaluate(model: nn.Module,
                                      log_interval)
 
             tracker.mark_iter()
+            if tot_samples >= n_samples:
+                break
 
     top1, top5 = accuracy_m.compute().values()
     robust_top1, _ = robust_accuracy_m.compute().values()

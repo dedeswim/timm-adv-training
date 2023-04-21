@@ -163,7 +163,8 @@ def main():
                                     dev_env,
                                     attack=eval_attack,
                                     log_interval=train_state.train_cfg.log_interval,
-                                    use_mp_loader=args.use_mp_loader)
+                                    use_mp_loader=args.use_mp_loader,
+                                    n_samples=args.n_eval_samples)
 
             if train_state.model_ema is not None:
                 if dev_env.distributed and args.dist_bn in ('broadcast', 'reduce'):
@@ -178,7 +179,8 @@ def main():
                                             phase_suffix='EMA',
                                             attack=eval_attack,
                                             log_interval=train_state.train_cfg.log_interval,
-                                            use_mp_loader=args.use_mp_loader)
+                                            use_mp_loader=args.use_mp_loader,
+                                            n_samples=args.n_eval_samples)
                 eval_metrics = ema_eval_metrics
 
             if train_state.lr_scheduler is not None:

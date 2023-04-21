@@ -565,10 +565,15 @@ parser.add_argument('--eval-attack-eps',
                     metavar='EPS',
                     help='The epsilon to use for the attack (default the same as `--attack-eps`)')
 parser.add_argument('--eval-attack-steps',
-                    default=20,
+                    default=40,
                     type=int,
                     metavar='STEPS',
-                    help='The attack steps (default 20)')
+                    help='The attack steps for eval')
+parser.add_argument('--n-eval-samples',
+                    default=1024,
+                    type=int,
+                    metavar='SAMPLES',
+                    help='The samples to use for eval')
 parser.add_argument('--trades-beta', default=6.0, type=float)
 
 parser.add_argument('--finetune', default=None, type=str, help='Finetune from checkpoint')

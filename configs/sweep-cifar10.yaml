@@ -20,7 +20,7 @@ channels_last: false
 checkpoint_hist: 10
 clip_grad: null
 clip_mode: norm
-color_jitter: 0.25
+color_jitter: 0.0
 cooldown_epochs: 10
 crop_pct: null
 cutmix: 0.0
@@ -94,7 +94,7 @@ patience_epochs: 10
 pin_mem: false
 pretrained: false
 rand_crop: true
-rand_rotation: 2
+rand_rotation: 0
 ratio:
 - 1.0
 - 1.0
@@ -108,7 +108,7 @@ save_images: false
 scale:
 - 1.0
 - 1.0
-sched: multistep
+sched: cosine
 seed: 42
 smoothing: 0.1
 split_bn: false
@@ -126,7 +126,7 @@ use_multi_epochs_loader: false
 val_split: validation
 validation_batch_size: null
 vflip: 0.0
-warmup_epochs: 0
+warmup_epochs: 10
 warmup_lr: 1.0e-6
 weight_decay: 5e-4
 workers: 4
