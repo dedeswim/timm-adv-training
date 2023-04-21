@@ -586,9 +586,11 @@ def resolve_attack_cfg(args, eval=False) -> AttackCfg:
         # Make train targeted attack untargeted
         name = args.attack.split("targeted_")[-1]
         eps = (args.eval_attack_eps or args.attack_eps) / 255
+        attack_steps = args.eval_attack_steps or args.attack_steps
     else:
         name = args.attack
         eps = args.attack_eps / 255
+        attack_steps = args.attack_steps
     step_size = args.attack_lr / 255 if args.attack_lr is not None else (1.5 * eps / args.attack_steps)
 
     return AttackCfg(name=name,
@@ -597,6 +599,6 @@ def resolve_attack_cfg(args, eval=False) -> AttackCfg:
                      eps_schedule_period=args.eps_schedule_period,
                      zero_eps_epochs=args.zero_eps_epochs,
                      step_size=step_size,
-                     steps=args.attack_steps,
+                     steps=attack_steps,
                      norm=args.attack_norm,
                      boundaries=args.attack_boundaries)

@@ -110,7 +110,7 @@ scale:
 - 1.0
 sched: multistep
 seed: 42
-smoothing: 0.0
+smoothing: 0.1
 split_bn: false
 start_epoch: null
 std:
