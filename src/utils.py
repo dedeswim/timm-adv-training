@@ -5,7 +5,7 @@ import os
 import tempfile
 import yaml
 from collections import OrderedDict
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Generator, Optional, Tuple, Union
 
 import timm
 import torch
@@ -167,6 +167,9 @@ class CombinedLoaders:
         tot_images_2 = len(loader_2.loader.dataset)
         self.tot_images = min(tot_images_1, tot_images_2)
         self.tot_real_batches = self.tot_images // self.batch_size
+        
+        self._iter_1 = iter(loader_1)
+        self._iter_2 = iter(loader_2)
 
     def __iter__(self):
         return self._iterator()
@@ -174,15 +177,21 @@ class CombinedLoaders:
     def __len__(self):
         return self.tot_real_batches
 
-    def _iterator(self):
-        batch_counter = 0
-        for (img1, label1), (img2, label2) in zip(self.loader_1, self.loader_2):
-            if batch_counter == self.tot_real_batches:
-                break
+    def _iterator(self) -> Generator[Tuple[torch.Tensor, torch.Tensor], None, None]:
+        for _ in range(self.tot_real_batches):
+            try:
+                img1, label1 = next(self._iter_1)
+            except StopIteration:
+                self._iter_1 = iter(self.loader_1)
+                img1, label1 = next(self._iter_1)
+            try:
+                img2, label2 = next(self._iter_2)
+            except StopIteration:
+                self._iter_2 = iter(self.loader_2)
+                img2, label2 = next(self._iter_2)
             images = torch.cat([img1, img2])
             labels = torch.cat([label1, label2])
             indices = torch.randperm(len(images))
-            batch_counter += 1
             yield images[indices], labels[indices]
 
     @property

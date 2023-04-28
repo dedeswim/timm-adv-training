@@ -59,7 +59,7 @@ log_interval: 50
 log_wandb: false
 lr: null
 lr_base: 0.1
-lr_base_size: 128
+lr_base_size: 256
 lr_cycle_decay: 0.5
 lr_cycle_limit: 1
 lr_cycle_mul: 1.0
@@ -79,7 +79,7 @@ mixup_prob: 1.0
 mixup_switch_prob: 0.5
 model: wide_resnet_28_10
 model_ema: false
-model_ema_decay: 0.999
+model_ema_decay: 0.995
 momentum: 0.9
 no_aug: false
 no_normalize: false
