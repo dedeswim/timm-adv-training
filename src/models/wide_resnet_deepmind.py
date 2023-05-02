@@ -152,6 +152,7 @@ class DMWideResNet(nn.Module):
                  padding: int = 0,
                  in_chans: int = 3,
                  img_size=32,
+                 drop_rate: float = 0.,
                  drop_path_rate=None):
         super().__init__()
         # persistent=False to not put these tensors in the module's state_dict and not try to
@@ -160,12 +161,7 @@ class DMWideResNet(nn.Module):
         num_channels = [16, 16 * width, 32 * width, 64 * width]
         assert (depth - 4) % 6 == 0
         num_blocks = (depth - 4) // 6
-        self.init_conv = nn.Conv2d(in_chans,
-                                   num_channels[0],
-                                   kernel_size=3,
-                                   stride=1,
-                                   padding=1,
-                                   bias=False)
+        self.init_conv = nn.Conv2d(in_chans, num_channels[0], kernel_size=3, stride=1, padding=1, bias=False)
         self.layer = nn.Sequential(
             _BlockGroup(num_blocks, num_channels[0], num_channels[1], 1, activation_fn=activation_fn),
             _BlockGroup(num_blocks, num_channels[1], num_channels[2], 2, activation_fn=activation_fn),
@@ -289,7 +285,7 @@ class DMPreActResNet(nn.Module):
 def _create_wide_resnet(variant, pretrained=False, default_cfg=None, **kwargs):
     model = build_model_with_cfg(DMWideResNet, variant, pretrained, **kwargs)
     return model
-    
+
 
 @register_model
 def wide_resnet28_10_dm(pretrained=False, **kwargs):
