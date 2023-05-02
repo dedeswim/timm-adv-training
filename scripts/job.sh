@@ -1,9 +1,15 @@
 #!/bin/bash
 
-declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20" "wide_resnet70_16")
-declare -a adv_training_techniques=("pgd" "trades")
-declare -a attack_steps=("1" "2" "5" "7" "10")
-declare -a ema_arguments=("--epochs=400 --decay-milestones 200 --model-ema --cutmix 1." "")
+# declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20" "wide_resnet70_16")
+# declare -a adv_training_techniques=("pgd" "trades")
+# declare -a attack_steps=("1" "2" "5" "7" "10")
+# declare -a ema_arguments=("--epochs=400 --decay-milestones 200 --model-ema --cutmix 1." "")
+# declare -a synthetic_data_arguments=("" "--combine-dataset deepmind_cifar10 --combined-dataset-ratio 0.7")
+
+declare -a model_names=("wide_resnet28_10" "wide_resnet28_10_dm")
+declare -a adv_training_techniques=("trades")
+declare -a attack_steps=("10")
+declare -a ema_arguments=("--epochs 400 --model-ema --cutmix 1." "")
 declare -a synthetic_data_arguments=("" "--combine-dataset deepmind_cifar10 --combined-dataset-ratio 0.7")
 
 export DATASET=cifar10
@@ -12,8 +18,10 @@ export BBANK=asyncmlb
 export BTIME=12:00
 export BOUTDIR=logs
 export BASE_CONFIG=configs/sweep-cifar10.yaml
-export EXPERIMENT=robust-hw
-export OUTPUT_DIR=/p/gpfs1/robustHW
+#export EXPERIMENT=robust-hw
+export EXPERIMENT=robust-hw-debugging
+export OUTPUT_DIR=/p/gpfs1/robustHW/debugging
+#export OUTPUT_DIR=/p/gpfs1/robustHW
 export MEAN="0.4914 0.4822 0.4465"
 export STD="0.2023 0.1994 0.2010"
 
@@ -61,7 +69,7 @@ do
               elif [ "$1" = "validate" ]; then
                 sh scripts/chainer_main.sh "validate_robustbench.py" "--data-dir=$DATA_DIR --model=$m --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS --log-wandb --log-to-file --aa-state-path ${OUTPUT_DIR}/${EXPERIMENT_DIR}/aa-state.json" $OUTPUT_DIR "$EXPERIMENT_DIR" aa; sleep 1
               else
-                echo "Invalid argument $a"
+                echo "Invalid argument $1"
                 exit 1
               fi
             } &

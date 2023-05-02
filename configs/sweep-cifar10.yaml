@@ -119,6 +119,7 @@ std:
 - 0.2010
 sync_bn: true
 torchscript: false
+trades_beta: 5
 train_interpolation: bicubic
 train_split: train
 tta: 0
