@@ -175,7 +175,7 @@ class DMWideResNet(nn.Module):
     def forward(self, x):
         if self.padding > 0:
             x = F.pad(x, (self.padding, ) * 4)
-        out = self.init_conv(out)
+        out = self.init_conv(x)
         out = self.layer(out)
         out = self.relu(self.batchnorm(out))
         out = F.avg_pool2d(out, 8)
