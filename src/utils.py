@@ -156,18 +156,18 @@ def normalize_model(model: nn.Module, mean: Tuple[float, float, float], std: Tup
 
 class CombinedLoaders:
 
-    def __init__(self, loader_1: Union[Fetcher, PrefetcherCuda], loader_2: Union[Fetcher, PrefetcherCuda]):
+    def __init__(self, loader_1: Union[Fetcher, PrefetcherCuda], loader_2: Union[Fetcher, PrefetcherCuda], n_devices: int):
         self.loader_1 = loader_1
         self.loader_2 = loader_2
         assert loader_1.mixup_enabled == loader_2.mixup_enabled
         self._mixup_enabled = loader_1.mixup_enabled
 
-        self.batch_size = loader_1.loader.batch_size + loader_2.loader.batch_size
+        self.batch_size = (loader_1.loader.batch_size + loader_2.loader.batch_size) * n_devices
         tot_images_1 = len(loader_1.loader.dataset)
         tot_images_2 = len(loader_2.loader.dataset)
         self.tot_images = min(tot_images_1, tot_images_2)
         self.tot_real_batches = self.tot_images // self.batch_size
-        
+
         self._iter_1 = iter(loader_1)
         self._iter_2 = iter(loader_2)
 

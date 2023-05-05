@@ -54,7 +54,6 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
     else:
         train_combine_batch_size = 0  # This is not used in practice
         train_batch_size = args.batch_size
-
     # create the train and eval datasets
     dataset_train = create_dataset(args.dataset,
                                    root=args.data_dir,
@@ -287,7 +286,7 @@ def setup_data(args, default_cfg, dev_env: DeviceEnv, mixup_active: bool):
             loader_train_combine._loader = pl.MpDeviceLoader(loader_train._loader, dev_env.device)
 
     if loader_train_combine is not None:
-        loader_train = utils.CombinedLoaders(loader_train, loader_train_combine)
+        loader_train = utils.CombinedLoaders(loader_train, loader_train_combine, dev_env.world_size)
 
     return data_config, loader_eval, loader_train
 

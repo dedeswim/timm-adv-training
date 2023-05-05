@@ -3,3 +3,4 @@ from . import wide_resnet
 from . import preact_resnet
 from . import adv_resnet
 from . import resnet
+from . import wide_resnet_deepmind
