@@ -147,8 +147,6 @@ class _BlockGroup(nn.Module):
 
 
 def init_modules(module: nn.Module) -> None:
-    for m in module.modules():
-        init_modules(m)
     if isinstance(module, nn.Conv2d):
         nn.init.trunc_normal_(module.weight)
         if module.bias is not None:
