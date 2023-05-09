@@ -15,7 +15,8 @@
 https://github.com/deepmind/deepmind-research/blob/master/adversarial_robustness/pytorch/model_zoo.py
 """
 
-from typing import Tuple, Type, Union
+from functools import partial
+from typing import Type
 
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from timm.models.helpers import build_model_with_cfg
@@ -28,6 +29,10 @@ CIFAR10_MEAN = (0.4914, 0.4822, 0.4465)
 CIFAR10_STD = (0.2471, 0.2435, 0.2616)
 CIFAR100_MEAN = (0.5071, 0.4865, 0.4409)
 CIFAR100_STD = (0.2673, 0.2564, 0.2762)
+
+
+BATCHNORM_MOMENTUM = 0.01
+BatchNorm2d = partial(nn.BatchNorm2d, momentum=BATCHNORM_MOMENTUM)
 
 
 def _cfg(url='', **kwargs):
@@ -84,12 +89,12 @@ class _Block(nn.Module):
 
     def __init__(self, in_planes, out_planes, stride, activation_fn: Type[nn.Module] = nn.ReLU):
         super().__init__()
-        self.batchnorm_0 = nn.BatchNorm2d(in_planes)
+        self.batchnorm_0 = BatchNorm2d(in_planes)
         self.relu_0 = activation_fn()
         # We manually pad to obtain the same effect as `SAME` (necessary when
         # `stride` is different than 1).
         self.conv_0 = nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=0, bias=False)
-        self.batchnorm_1 = nn.BatchNorm2d(out_planes)
+        self.batchnorm_1 = BatchNorm2d(out_planes)
         self.relu_1 = activation_fn()
         self.conv_1 = nn.Conv2d(out_planes, out_planes, kernel_size=3, stride=1, padding=1, bias=False)
         self.has_shortcut = in_planes != out_planes
@@ -141,6 +146,17 @@ class _BlockGroup(nn.Module):
         return self.block(x)
 
 
+def init_modules(module: nn.Module) -> None:
+    for m in module.modules():
+        init_modules(m)
+    if isinstance(module, nn.Conv2d):
+        nn.init.trunc_normal_(module.weight)
+        if module.bias is not None:
+            nn.init.zeros_(module.bias)
+    elif isinstance(module, nn.BatchNorm2d):
+        nn.init.ones_(module.weight)
+        nn.init.zeros_(module.bias)
+
 class DMWideResNet(nn.Module):
     """WideResNet."""
 
@@ -167,10 +183,16 @@ class DMWideResNet(nn.Module):
             _BlockGroup(num_blocks, num_channels[0], num_channels[1], 1, activation_fn=activation_fn),
             _BlockGroup(num_blocks, num_channels[1], num_channels[2], 2, activation_fn=activation_fn),
             _BlockGroup(num_blocks, num_channels[2], num_channels[3], 2, activation_fn=activation_fn))
-        self.batchnorm = nn.BatchNorm2d(num_channels[3])
+        self.batchnorm = BatchNorm2d(num_channels[3])
         self.relu = activation_fn()
         self.logits = nn.Linear(num_channels[3], self.num_classes)
         self.num_channels = num_channels[3]
+        self._init_weights()
+    
+    def _init_weights(self) -> None:
+        nn.init.zeros_(self.logits.weight)
+        nn.init.zeros_(self.logits.bias)
+        init_modules(self)
 
     def forward(self, x):
         if self.padding > 0:

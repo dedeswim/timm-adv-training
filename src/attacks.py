@@ -8,10 +8,10 @@ The original license can be found here:
 https://github.com/deepmind/deepmind-research/blob/master/LICENSE
 """
 
+from contextlib import contextmanager
 import functools
-import math
 from dataclasses import dataclass
-from typing import Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Generator, Optional, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -27,6 +27,23 @@ InitFn = Callable[[torch.Tensor, float, ProjectFn, Boundaries], torch.Tensor]
 EpsSchedule = Callable[[int], float]
 ScheduleMaker = Callable[[float, int, int], EpsSchedule]
 Norm = str
+
+
+@contextmanager
+def stop_tracking_bn_stats(model: nn.Module) -> Generator[None, Any, None]:
+    track_bn_stats(model, track_stats=False)
+    yield
+    track_bn_stats(model, track_stats=True)
+
+
+def track_bn_stats(model, track_stats=True):
+    """
+    If track_stats=False, do not update BN running mean and variance and vice versa.
+    From https://github.com/imrahulr/adversarial_robustness_pytorch/blob/main/core/utils/utils.py#LL33C1-L39C53
+    """
+    for module in model.modules():
+        if isinstance(module, torch.nn.modules.batchnorm._BatchNorm):
+            module.track_running_stats = track_stats
 
 
 def project_linf(x: torch.Tensor, x_adv: torch.Tensor, eps: float, boundaries: Boundaries) -> torch.Tensor:
@@ -280,15 +297,14 @@ class TRADESLoss(nn.Module):
                 epoch: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         batch_size = x.size(0)
         # Avoid setting the model in eval mode if on XLA (it crashes)
-        if self.eval_mode:
-            model.eval()  # FIXME: understand why with eval the gradient
-        # of BatchNorm crashes
         output_softmax = F.softmax(model(x.detach()), dim=-1)
-        x_adv = self.attack(model, x, output_softmax, epoch)
         model.train()
-
-        self.optimizer.zero_grad()
-        logits, logits_adv = model(x), model(x_adv)
+        with stop_tracking_bn_stats(model):
+            x_adv = self.attack(model, x, output_softmax, epoch)
+            self.optimizer.zero_grad()
+            logits = model(x)
+        
+        logits_adv = model(x_adv)
         loss_natural = self.natural_criterion(logits, y)
         loss_robust = (1.0 / batch_size) * self.kl_criterion(F.log_softmax(logits_adv, dim=1),
                                                              F.softmax(logits, dim=1))
