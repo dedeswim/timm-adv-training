@@ -16,10 +16,8 @@ export BBANK=asyncmlb
 export BTIME=12:00
 export BOUTDIR=logs
 export BASE_CONFIG=configs/sweep-cifar10.yaml
-#export EXPERIMENT=robust-hw
 export EXPERIMENT=robust-hw
 export OUTPUT_DIR=/p/gpfs1/robustHW/
-#export OUTPUT_DIR=/p/gpfs1/robustHW
 export MEAN="0.4914 0.4822 0.4465"
 export STD="0.2023 0.1994 0.2010"
 
@@ -71,7 +69,7 @@ do
                 exit 1
               fi
             } &
-          sleep 0.5
+          sleep 1
         done
       done
     done

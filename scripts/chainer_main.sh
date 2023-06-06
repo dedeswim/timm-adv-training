@@ -4,7 +4,7 @@
 # or Arguments: sh chainer.sh TRAINSCRIPT TRAINCONFIG repeat
 
 # max number of jobs to chain
-export MAX=36
+export MAX=16
 # number of nodes, we need to specify here instead of in the submit.sh job
 export NNODES=1
 # train script, should just be a filename. `python $TRAINSCRIPT`
@@ -56,7 +56,7 @@ if [ $# -eq 6 ]; then
     TRAINCONFIG="$TRAINCONFIG --resume $EXP_OUT_DIR/$EXP_NAME/last.pth.tar"
   fi
 
-  CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir $BOUTDIR -oo ${BOUTDIR}/${outputname}.out -w ended(${dep_name})"
+  CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir $BOUTDIR -oo ${EXP_OUT_DIR}/${EXP_NAME}/${BOUTDIR}/${outputname}.out -w ended(${dep_name})"
 fi
 
 if [ $# -eq 5 ]; then
@@ -65,7 +65,8 @@ if [ $# -eq 5 ]; then
   currcount=0
   name="${CHAINNAME}_${currcount}"
   outputname="${name}_%J"
-  CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir $BOUTDIR -oo ${BOUTDIR}/${outputname}.out"
+  mkdir -p ${EXP_OUT_DIR}/${EXP_NAME}/${BOUTDIR}
+  CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir $BOUTDIR -oo ${EXP_OUT_DIR}/${EXP_NAME}/${BOUTDIR}/${outputname}.out"
 fi
 
 echo "chainer main: $CMD sh $STARTSCRIPT \"$TRAINSCRIPT\" \"$TRAINCONFIG\" $EXP_OUT_DIR $EXP_NAME $TRAIN_OR_AA $currcount"
