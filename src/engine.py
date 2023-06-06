@@ -101,7 +101,7 @@ def train_one_epoch(
     gpu_hours = start.elapsed_time(end) * 1e-3 / 3600
     cloud_dollar_cost_lower_bound = 0.43 * 4 * gpu_hours # use 4 GPUs
     cloud_dollar_cost_upper_bound = 1.46 * 4 * gpu_hours # use 4 GPUs
-    electricity_dollar_cost = 0.12 * (300 * 4 * gpu_hours / 1000) * 1.58 # use 4 GPUs    
+    electricity_dollar_cost = 0.12 * (300 * 4 * gpu_hours / 1000) * 1.58 # use 4 GPUs
 
     #f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}\n")
     f.write(f"Epoch: {state.epoch}; Latency (ms): {start.elapsed_time(end)}; Emissions (kg): {emissions}; FLOPS (T): {training_flops}; gpu_hour (h): {gpu_hours}; cloud_computing_cost ($): {cloud_dollar_cost_lower_bound, cloud_dollar_cost_upper_bound}; electricity_cost ($): {electricity_dollar_cost}\n")
