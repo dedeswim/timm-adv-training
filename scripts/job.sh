@@ -1,15 +1,13 @@
 #!/bin/bash
 
-# declare -a model_names=("resnet18_32" "wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20" "wide_resnet70_16")
-# declare -a adv_training_techniques=("pgd" "trades")
-# declare -a attack_steps=("1" "2" "5" "7" "10")
-# declare -a ema_arguments=("--epochs=400 --decay-milestones 200 --model-ema --cutmix 1." "")
-# declare -a synthetic_data_arguments=("" "--combine-dataset deepmind_cifar10 --combined-dataset-ratio 0.7")
+"""
+Notes -> use both swish and relu for both wrn and relu, keep cosine for all
+"""
 
-declare -a model_names=("wide_resnet28_10" "wide_resnet28_10_dm")
-declare -a adv_training_techniques=("trades")
-declare -a attack_steps=("10")
-declare -a ema_arguments=("--epochs 390 --model-ema --cutmix 1.")
+declare -a model_names=("wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20" "wide_resnet70_16" "wide_resnet28_10_dm" "wide_resnet34_10_dm" "wide_resnet34_20_dm" "wide_resnet70_16_dm")
+declare -a adv_training_techniques=("pgd" "trades")
+declare -a attack_steps=("1" "2" "5" "7" "10")
+declare -a ema_arguments=("--epochs 390 --model-ema --cutmix 1." "")
 declare -a synthetic_data_arguments=("" "--combine-dataset deepmind_cifar10 --combined-dataset-ratio 0.7")
 
 export DATASET=cifar10
@@ -19,8 +17,8 @@ export BTIME=12:00
 export BOUTDIR=logs
 export BASE_CONFIG=configs/sweep-cifar10.yaml
 #export EXPERIMENT=robust-hw
-export EXPERIMENT=robust-hw-debugging
-export OUTPUT_DIR=/p/gpfs1/robustHW/debugging
+export EXPERIMENT=robust-hw
+export OUTPUT_DIR=/p/gpfs1/robustHW/
 #export OUTPUT_DIR=/p/gpfs1/robustHW
 export MEAN="0.4914 0.4822 0.4465"
 export STD="0.2023 0.1994 0.2010"
@@ -32,11 +30,11 @@ export N_GPUS=4
 
 for m in "${model_names[@]}"
 do
-  if [ "$m" = "wide_resnet34_20" ]; then
+  if [ "$m" = "wide_resnet34_20" ] || [ "$m" = "wide_resnet28_10_dm" ]; then
     TRAIN_BATCH_SIZE=64
     VAL_BATCH_SIZE=1024
     TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"
-  elif [ "$m" = "wide_resnet70_16" ]; then
+  elif [ "$m" = "wide_resnet70_16" ] || [ "$m" = "wide_resnet34_10_dm" ] || [ "$m" = "wide_resnet34_20_dm" ] || [ "$m" = "wide_resnet70_16_dm" ]; then
     TRAIN_BATCH_SIZE=32
     VAL_BATCH_SIZE=512
     TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"
