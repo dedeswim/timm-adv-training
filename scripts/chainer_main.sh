@@ -23,7 +23,7 @@ export BBANK=asyncmlb
 # time limit for the job
 export BTIME=12:00
 # outdir of the logs
-export BOUTDIR=logs
+export BOUTDIR=${EXP_OUT_DIR}/${EXP_NAME}/logs
 
 repeat=$6
 
@@ -56,7 +56,7 @@ if [ $# -eq 6 ]; then
     TRAINCONFIG="$TRAINCONFIG --resume $EXP_OUT_DIR/$EXP_NAME/last.pth.tar"
   fi
 
-  CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir $BOUTDIR -oo ${EXP_OUT_DIR}/${EXP_NAME}/${BOUTDIR}/${outputname}.out -w ended(${dep_name})"
+  CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir ${BOUTDIR} -oo ${BOUTDIR}/${outputname}.out -w ended(${dep_name})"
 fi
 
 if [ $# -eq 5 ]; then
@@ -65,8 +65,8 @@ if [ $# -eq 5 ]; then
   currcount=0
   name="${CHAINNAME}_${currcount}"
   outputname="${name}_%J"
-  mkdir -p ${EXP_OUT_DIR}/${EXP_NAME}/${BOUTDIR}
-  CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir $BOUTDIR -oo ${EXP_OUT_DIR}/${EXP_NAME}/${BOUTDIR}/${outputname}.out"
+  mkdir -p ${BOUTDIR}
+  CMD="bsub -nnodes $NNODES -alloc_flags ipisolate -W $BTIME -G $BBANK -J $name -outdir ${BOUTDIR} -oo ${BOUTDIR}/${outputname}.out"
 fi
 
 echo "chainer main: $CMD sh $STARTSCRIPT \"$TRAINSCRIPT\" \"$TRAINCONFIG\" $EXP_OUT_DIR $EXP_NAME $TRAIN_OR_AA $currcount"
