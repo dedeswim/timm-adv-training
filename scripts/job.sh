@@ -71,7 +71,11 @@ do
             } &
           sleep 1
         done
+        sleep 1
       done
+      sleep 10
     done
+    sleep 10
   done
+  sleep 10
 done

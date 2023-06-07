@@ -23,7 +23,7 @@ export BBANK=asyncmlb
 # time limit for the job
 export BTIME=12:00
 # outdir of the logs
-export BOUTDIR=${EXP_OUT_DIR}/${EXP_NAME}/logs
+export BOUTDIR=logs
 
 repeat=$6
 
