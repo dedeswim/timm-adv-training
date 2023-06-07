@@ -1,9 +1,5 @@
 #!/bin/bash
 
-"""
-Notes -> use both swish and relu for both wrn and relu, keep cosine for all
-"""
-
 declare -a model_names=("wide_resnet28_10" "wide_resnet34_10" "wide_resnet34_20" "wide_resnet70_16" "wide_resnet28_10_dm" "wide_resnet34_10_dm" "wide_resnet34_20_dm" "wide_resnet70_16_dm")
 declare -a adv_training_techniques=("pgd" "trades")
 declare -a attack_steps=("1" "2" "5" "7" "10")
