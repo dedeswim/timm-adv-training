@@ -25,12 +25,12 @@ export N_GPUS=4
 for m in "${model_names[@]}"
 do
   if [ "$m" = "wide_resnet34_20" ] || [ "$m" = "wide_resnet28_10_dm" ]; then
-    TRAIN_BATCH_SIZE=64
-    VAL_BATCH_SIZE=1024
-    TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"
-  elif [ "$m" = "wide_resnet70_16" ] || [ "$m" = "wide_resnet34_10_dm" ] || [ "$m" = "wide_resnet34_20_dm" ] || [ "$m" = "wide_resnet70_16_dm" ]; then
     TRAIN_BATCH_SIZE=32
     VAL_BATCH_SIZE=512
+    TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"
+  elif [ "$m" = "wide_resnet70_16" ] || [ "$m" = "wide_resnet34_10_dm" ] || [ "$m" = "wide_resnet34_20_dm" ] || [ "$m" = "wide_resnet70_16_dm" ]; then
+    TRAIN_BATCH_SIZE=16
+    VAL_BATCH_SIZE=256
     TRAIN_BATCH_SIZE_CONFIG="--batch-size=$TRAIN_BATCH_SIZE"
   else
     TRAIN_BATCH_SIZE_CONFIG=""
@@ -57,6 +57,10 @@ do
             EXPERIMENT_DIR=${EXPERIMENT}_${m}_${a}_${s}_${is_ema}${is_synthetic}
             {
               if [ "$1" = "train" ]; then
+                if [ -d "${OUTPUT_DIR}/${EXPERIMENT_DIR}" ]; then
+                  echo "Skipping ${OUTPUT_DIR}/${EXPERIMENT_DIR}"
+                  continue
+                fi
                 sh scripts/chainer_main.sh "-m torch.distributed.run --nproc_per_node=4 --master_port=6712 train.py" "${DATA_DIR} --config=$BASE_CONFIG --output $OUTPUT_DIR --experiment=$EXPERIMENT_DIR --log-wandb --wandb-project=robust-hw --mean $MEAN --std $STD --model=$m --adv-training=$a --attack-steps=$s $TRAIN_BATCH_SIZE_CONFIG $ema $synthetic_data" $OUTPUT_DIR "$EXPERIMENT_DIR" train
               elif [ "$1" = "validate" ]; then
                 sh scripts/chainer_main.sh "validate_robustbench.py" "--data-dir=$DATA_DIR --model=$m --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS --log-wandb --log-to-file --aa-state-path ${OUTPUT_DIR}/${EXPERIMENT_DIR}/aa-state.json" $OUTPUT_DIR "$EXPERIMENT_DIR" aa; sleep 1
