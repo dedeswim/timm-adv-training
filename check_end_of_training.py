@@ -8,7 +8,7 @@ def check_end_of_training(checkpoint_path, config_path):
     checkpoint = torch.load(checkpoint_path)
     trained_epochs = checkpoint['epoch']
     with open(config_path) as f:
-        config_dict = yaml.load(f)
+        config_dict = yaml.load(f, Loader=yaml.SafeLoader)
     epochs_to_train = config_dict['epochs'] + config_dict['warmup_epochs']
     return trained_epochs >= epochs_to_train - 1
     
