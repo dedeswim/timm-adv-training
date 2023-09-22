@@ -1,4 +1,3 @@
-robust-hw_wide_resnet28_10_dm_pgd_2_ema
 robust-hw_wide_resnet70_16_dm_trades_2_ema
 robust-hw_wide_resnet70_16_dm_trades_7_ema
 robust-hw_wide_resnet70_16_dm_pgd_7_no_ema_synthetic
