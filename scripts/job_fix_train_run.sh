@@ -17,6 +17,7 @@ export N_GPUS=4
 m=wide_resnet34_20_dm
 a=pgd
 s=2
+ema="--epochs 390 --model-ema --cutmix 1."
 is_ema="ema"
 is_synthetic=""
 synthetic_data=""
