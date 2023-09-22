@@ -82,7 +82,13 @@ def build_info_from_experiment(exp_path: Path) -> dict:
 
 if __name__ == '__main__':
     exps_path = Path(sys.argv[1])
-    results = [build_info_from_experiment(exp_path) for exp_path in tqdm(exps_path.iterdir()) if "robust-hw" in exp_path.name]
+    results = []
+    for exp_path in tqdm(exps_path.iterdir()):
+        if "robust-hw" in exp_path.name:
+            try:
+                results.append(build_info_from_experiment(exp_path))
+            except ValueError:
+                print(f'Experiment {exp_path} is not finished yet.')
     with open('results.csv', 'w') as f:
         writer = csv.DictWriter(f, fieldnames=results[0].keys())
         writer.writeheader()
