@@ -20,7 +20,6 @@ VAL_BATCH_SIZE=128
 while read path; do
   EXPERIMENT_DIR=${path}
   {
-      python check_end_of_training.py ${OUTPUT_DIR}/${EXPERIMENT_DIR}
       sh scripts/chainer_main.sh "validate_robustbench.py" "--data-dir=$DATA_DIR --model=resnet70_16_dm --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS --log-wandb --log-to-file --aa-state-path ${OUTPUT_DIR}/${EXPERIMENT_DIR}/aa-state.json" $OUTPUT_DIR "$EXPERIMENT_DIR" aa; sleep 1
   } &
   sleep 1
@@ -29,7 +28,6 @@ done <aa_to_run_dm.txt
 while read path; do
   EXPERIMENT_DIR=${path}
   {
-      python check_end_of_training.py ${OUTPUT_DIR}/${EXPERIMENT_DIR}
       sh scripts/chainer_main.sh "validate_robustbench.py" "--data-dir=$DATA_DIR --model=resnet70_16 --checkpoint=${OUTPUT_DIR}/${EXPERIMENT_DIR}/best.pth.tar --batch-size=$VAL_BATCH_SIZE --eps=$EPS --mean $MEAN --std $STD --gpus=$N_GPUS --log-wandb --log-to-file --aa-state-path ${OUTPUT_DIR}/${EXPERIMENT_DIR}/aa-state.json" $OUTPUT_DIR "$EXPERIMENT_DIR" aa; sleep 1
   } &
   sleep 1
