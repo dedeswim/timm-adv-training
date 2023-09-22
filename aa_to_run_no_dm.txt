@@ -1,0 +1,2 @@
+robust-hw_wide_resnet70_16_trades_10_no_ema
+robust-hw_wide_resnet70_16_trades_10_no_ema_synthetic
