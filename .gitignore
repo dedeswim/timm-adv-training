@@ -285,3 +285,4 @@ notebooks/outputs
 tensorboard
 
 .DS_Store
+.logs
